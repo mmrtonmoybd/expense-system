@@ -6,10 +6,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Admin\Resources\Users\UserResource;
-use App\Filament\Admin\Widgets\LatestAccessLogs;
 use App\Models\User;
+use App\Support\SettingsRepository;
 use Awcodes\Overlook\OverlookPlugin;
-use Awcodes\Overlook\Widgets\OverlookWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Caresome\FilamentAuthDesigner\AuthDesignerPlugin;
 use Caresome\FilamentAuthDesigner\Enums\MediaPosition;
@@ -23,16 +22,17 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color as FilamentColor;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Openplain\FilamentShadcnTheme\Color;
 
@@ -43,18 +43,30 @@ final class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->authGuard('web')
             ->spa()
             ->spaUrlExceptions([
                 Dashboard::class,
             ])
             ->login()
-            ->topbar(false)
+            ->brandName(fn (): string => (string) app(SettingsRepository::class)->get('business_name', config('app.name')))
+            ->brandLogo(function (): ?string {
+                $logo = app(SettingsRepository::class)->get('login_logo') ?: app(SettingsRepository::class)->get('business_logo');
+
+                return $logo ? asset('storage/'.$logo) : null;
+            })
+            // ->topbar(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('16rem')
             ->maxContentWidth(Width::Full)
             ->databaseTransactions()
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => view('pwa.head')->render())
+            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => view('pwa.install-button')->render())
+            ->renderHook(PanelsRenderHook::BODY_END, fn (): string => view('pwa.offline-indicator')->render())
+            ->assets([
+                Js::make('pwa-install', resource_path('js/pwa-install.js')),
+            ])
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
                 'primary' => Color::adaptive(
@@ -68,16 +80,17 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                OverlookWidget::class,
-                LatestAccessLogs::class,
+                //
             ])
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->collapsed(true)
-                    ->label('General'),
-                NavigationGroup::make()
-                    ->collapsed(true)
-                    ->label('Administration'),
+                NavigationGroup::make()->label('General'),
+                NavigationGroup::make()->label('Sales'),
+                NavigationGroup::make()->label('Customers'),
+                NavigationGroup::make()->label('Inventory'),
+                NavigationGroup::make()->label('Expenses'),
+                NavigationGroup::make()->label('Payroll'),
+                NavigationGroup::make()->label('Reports'),
+                NavigationGroup::make()->label('Administration'),
             ])
             ->plugins([
                 AuthDesignerPlugin::make()
@@ -122,7 +135,6 @@ final class AdminPanelProvider extends PanelProvider
                     ->navigationGroup('Administration')
                     ->navigationSort(2)
                     ->navigationIcon(Heroicon::ShieldCheck),
-                FilamentLoggerPlugin::make(),
                 FilamentDeveloperLoginsPlugin::make()
                     ->enabled(app()->environment('local'))
                     ->switchable(true)

@@ -69,6 +69,14 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
+    'date_format' => 'd M, Y',
+
+    'time_format' => 'h:i A',
+
+    'datetime_format' => 'd M, Y h:i A',
+
+    'datetime_seconds_format' => 'd M, Y h:i:s A',
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

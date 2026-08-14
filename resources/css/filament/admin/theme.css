@@ -4,3 +4,110 @@
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../vendor/jeffgreco13/filament-breezy/resources/**/*';
 @source '../../../../vendor/awcodes/overlook/resources/**/*.blade.php';
+
+@theme {
+    --color-brand-blue: #3b5ef8;
+    --color-shell: #e6e9fc;
+}
+
+.fi-body,
+.fi-layout,
+.fi-main {
+    background: #e6e9fc;
+}
+
+.dark .fi-body,
+.dark .fi-layout,
+.dark .fi-main {
+    background: #111827;
+}
+
+.fi-topbar {
+    border-bottom: 0;
+    background: linear-gradient(90deg, #d33572 0%, #8741b5 50%, #435cea 100%);
+}
+
+.fi-topbar .fi-icon-btn-icon,
+.fi-topbar .fi-logo,
+.fi-topbar .fi-topbar-item-label {
+    color: white;
+}
+
+.fi-sidebar,
+.fi-sidebar-nav {
+    border-right: 1px solid #e5e7eb;
+    background: white;
+}
+
+.dark .fi-sidebar,
+.dark .fi-sidebar-nav {
+    border-color: #263244;
+    background: #0f172a;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn,
+.fi-sidebar-item.fi-active > a {
+    border-radius: 0.75rem;
+    background: #3b5ef8;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    color: white;
+}
+
+.fi-section,
+.fi-ta-ctn,
+.fi-wi-stats-overview-stat {
+    border: 0;
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 4px 14px rgb(31 41 55 / 0.06);
+    --tw-ring-shadow: 0 0 #0000;
+}
+
+.dark .fi-section,
+.dark .fi-ta-ctn,
+.dark .fi-wi-stats-overview-stat {
+    background: #172033;
+}
+
+.fi-btn,
+.fi-input-wrp,
+.fi-select-input {
+    min-height: 2.75rem;
+}
+
+.fi-main-ctn {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 640px) {
+    .fi-main {
+        padding-inline: 0.75rem;
+    }
+
+    .fi-section-content-ctn,
+    .fi-ta-content {
+        overflow-x: auto;
+    }
+
+    .fi-modal-window {
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+}
+
+@media print {
+    .fi-sidebar,
+    .fi-topbar,
+    .fi-header-actions,
+    .fi-ta-actions,
+    .fi-pagination {
+        display: none !important;
+    }
+
+    .fi-main,
+    .fi-layout {
+        background: white !important;
+    }
+}

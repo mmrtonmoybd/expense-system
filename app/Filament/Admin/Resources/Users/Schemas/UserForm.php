@@ -21,6 +21,10 @@ final class UserForm
                 FileUpload::make('avatar_url')
                     ->label('Avatar')
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(2048)
+                    ->directory('avatars')
+                    ->visibility('public')
                     ->imageEditor()
                     ->imagePreviewHeight('250')
                     ->panelAspectRatio('6:5')
@@ -37,6 +41,7 @@ final class UserForm
                             ->required()
                             ->prefixIcon(Heroicon::Envelope)
                             ->email()
+                            ->unique(ignoreRecord: true)
                             ->columnSpanFull(),
                         TextInput::make('password')
                             ->password()
@@ -52,6 +57,7 @@ final class UserForm
                             ->password()
                             ->revealable()
                             ->prefixIcon(Heroicon::FingerPrint)
+                            ->dehydrated(false)
                             ->columnSpan(1),
                         Select::make('roles')
                             ->label('Roles')

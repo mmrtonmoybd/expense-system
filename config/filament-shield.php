@@ -23,7 +23,7 @@ return [
             'pages' => true,
             'widgets' => true,
             'resources' => true,
-            'custom_permissions' => false,
+            'custom_permissions' => true,
         ],
     ],
 
@@ -119,10 +119,10 @@ return [
 
     'policies' => [
         'path' => app_path('Policies'),
-        'merge' => true,
+        'merge' => false,
         'generate' => true,
         'methods' => [
-            'viewAny', 'view', 'create', 'update', 'delete',
+            'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny',
         ],
         'single_parameter_methods' => [
             'viewAny',
@@ -167,6 +167,25 @@ return [
                 'create',
                 'update',
                 'delete',
+                'deleteAny',
+            ],
+            App\Filament\Admin\Resources\AuditLogs\AuditLogResource::class => [
+                'viewAny',
+                'view',
+            ],
+            App\Filament\Admin\Resources\InventoryTransactions\InventoryTransactionResource::class => [
+                'viewAny',
+                'view',
+            ],
+            App\Filament\Admin\Resources\Invoices\InvoiceResource::class => [
+                'viewAny',
+                'view',
+            ],
+            App\Filament\Admin\Resources\Expenses\ExpenseResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
             ],
         ],
         'exclude' => [
@@ -225,7 +244,11 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    'custom_permissions' => [
+        'ViewProfit', 'ViewInternalCosts', 'OverrideRate:Sale', 'Post:Sale', 'Approve:Sale',
+        'Reject:Sale', 'Reverse:Sale', 'Post:UsdPurchase', 'Adjust:Inventory', 'Export:Report',
+        'View:Reports', 'Manage:Settings', 'ViewPayroll', 'Pay:Payroll',
+    ],
 
     /*
     |--------------------------------------------------------------------------

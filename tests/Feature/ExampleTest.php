@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-test('the application returns a successful response', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
+test('the root application redirects guests to the office login', function () {
+    $this->get('/')->assertRedirectToRoute('filament.admin.auth.login');
 });

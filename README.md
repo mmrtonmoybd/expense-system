@@ -29,7 +29,6 @@ Preview DashBoard:
     - caresome/filament-auth-designer
     - charrafimed/global-search-modal
     - dutchcodingcompany/filament-developer-logins
-    - jacobtims/filament-logger
     - jeffgreco13/filament-breezy
     - marcelweidum/filament-expiration-notice
     - openplain/filament-shadcn-theme (Theme)
@@ -123,3 +122,32 @@ composer create-project --prefer-dist raugadh/fila-starter example-app
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+## Finance Application Setup
+
+```bash
+composer install
+php artisan migrate
+php artisan db:seed --class=AuthorizationSeeder
+php artisan storage:link
+npm install
+npm run build
+```
+
+The optional deterministic demo dataset is guarded and only runs in `local`, `testing`, or `demo` environments:
+
+```bash
+php artisan db:seed --class=DemoDataSeeder
+```
+
+All demo accounts use password `password`:
+
+| Role        | Email                |
+| ----------- | -------------------- |
+| Super Admin | `super@demo.test`    |
+| Owner       | `owner@demo.test`    |
+| Admin       | `admin@demo.test`    |
+| Employee    | `employee@demo.test` |
+| Normal User | `user@demo.test`     |
+
+Never run the demo seeder in production. Configure the business, invoice, approval, and PWA branding values from **Admin → Settings** after installation.
