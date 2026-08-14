@@ -1,8 +1,7 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
-    "name": "raugadh/fila-starter",
+    "name": "mmrtonmoybd/expense-system",
     "type": "project",
-    "description": "Laravel Filament Starter.",
+    "description": "Expense Tracker System",
     "keywords": [
         "laravel",
         "framework",
