@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/usr/bin/php",
+            "args": [
+                "/home/tonmoy/web/expense-system/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

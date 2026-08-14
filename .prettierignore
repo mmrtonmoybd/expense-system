@@ -1,0 +1,17 @@
+/vendor
+/node_modules
+/public
+/storage
+/bootstrap/cache
+/.idea
+/.vscode
+/.fleet
+/.zed
+*.log
+.env
+.env.*
+package-lock.json
+composer.lock
+.phpunit.cache
+.pest_cache
+.rector_cache
