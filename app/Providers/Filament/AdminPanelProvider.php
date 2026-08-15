@@ -34,7 +34,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Openplain\FilamentShadcnTheme\Color;
+use Northwestern\FilamentTheme\NorthwesternTheme;
 
 final class AdminPanelProvider extends PanelProvider
 {
@@ -51,11 +51,9 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->login()
             ->brandName(fn (): string => (string) app(SettingsRepository::class)->get('business_name', config('app.name')))
-            ->brandLogo(function (): ?string {
-                $logo = app(SettingsRepository::class)->get('login_logo') ?: app(SettingsRepository::class)->get('business_logo');
-
-                return $logo ? asset('storage/'.$logo) : null;
-            })
+            ->brandLogo(fn () => view('filament.admin.brand'))
+            ->darkModeBrandLogo(fn () => view('filament.admin.brand'))
+            ->brandLogoHeight('2.25rem')
             // ->topbar(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('16rem')
@@ -69,10 +67,7 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
-                'primary' => Color::adaptive(
-                    lightColor: FilamentColor::Blue,
-                    darkColor: FilamentColor::Sky
-                ),
+                'primary' => FilamentColor::Orange,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
@@ -93,11 +88,11 @@ final class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()->label('Administration'),
             ])
             ->plugins([
+                NorthwesternTheme::make()->withoutAssetRegistration(),
                 AuthDesignerPlugin::make()
                     ->login(fn ($config) => $config
                         ->media('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
-                        ->mediaPosition(MediaPosition::Left)
-                        ->mediaSize('70%')
+                        ->mediaPosition(MediaPosition::Cover)
                         ->blur(1)
                     )
                     ->themeToggle('90%', '50%'),

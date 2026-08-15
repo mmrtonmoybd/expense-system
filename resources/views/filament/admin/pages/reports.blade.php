@@ -11,10 +11,14 @@
     </form>
 
     @if ($report)
-        <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
-            <div class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between dark:border-white/10">
+        <section
+            class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+        >
+            <div
+                class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between dark:border-white/10"
+            >
                 <div>
-                    <p class="text-xs font-semibold tracking-wider text-primary-600 uppercase dark:text-primary-400">
+                    <p class="text-primary-600 dark:text-primary-400 text-xs font-semibold tracking-wider uppercase">
                         Financial report
                     </p>
                     <h2 class="mt-1 text-xl font-bold text-gray-950 dark:text-white">{{ $report['title'] }}</h2>
@@ -80,7 +84,9 @@
                     <thead class="bg-gray-50/80 dark:bg-white/5">
                         <tr>
                             @foreach ($report['headings'] as $heading)
-                                <th class="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap text-gray-600 uppercase dark:text-gray-300">
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap text-gray-600 uppercase dark:text-gray-300"
+                                >
                                     {{ $heading }}
                                 </th>
                             @endforeach
@@ -88,7 +94,10 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white dark:divide-white/5 dark:bg-gray-900">
                         @forelse ($report['rows'] as $rowIndex => $row)
-                            <tr wire:key="report-row-{{ $reportPage }}-{{ $rowIndex }}" class="transition hover:bg-primary-50/40 dark:hover:bg-white/5">
+                            <tr
+                                wire:key="report-row-{{ $reportPage }}-{{ $rowIndex }}"
+                                class="hover:bg-primary-50/40 transition dark:hover:bg-white/5"
+                            >
                                 @foreach ($row as $value)
                                     <td class="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                         {{ $value }}
@@ -98,7 +107,9 @@
                         @empty
                             <tr>
                                 <td class="px-4 py-14 text-center" colspan="{{ count($report['headings']) }}">
-                                    <div class="mx-auto flex max-w-sm flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                                    <div
+                                        class="mx-auto flex max-w-sm flex-col items-center gap-2 text-gray-500 dark:text-gray-400"
+                                    >
                                         <x-filament::icon icon="heroicon-o-magnifying-glass" class="h-8 w-8" />
                                         <p class="font-medium text-gray-700 dark:text-gray-200">No matching records</p>
                                         <p class="text-sm">Try changing the selected filters or date range.</p>
@@ -111,9 +122,12 @@
             </div>
 
             @if ($report['pagination'] && $report['pagination']['last_page'] > 1)
-                <div class="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-white/10">
+                <div
+                    class="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-white/10"
+                >
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Showing {{ number_format($report['pagination']['from']) }}–{{ number_format($report['pagination']['to']) }}
+                        Showing
+                        {{ number_format($report['pagination']['from']) }}–{{ number_format($report['pagination']['to']) }}
                         of {{ number_format($report['pagination']['total']) }}
                     </p>
                     <div class="flex gap-2">

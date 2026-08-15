@@ -1,0 +1,99 @@
+.fi-sidebar {
+    @apply space-y-5;
+
+    .fi-sidebar-group {
+        @apply border-t border-transparent;
+
+        .fi-sidebar-group-label {
+            @apply flex items-center justify-between px-2 pb-3 text-sm/4 font-medium text-slate-900 dark:text-slate-200;
+
+            .fi-sidebar-group-toggle {
+                @apply text-slate-400 dark:text-slate-500;
+            }
+        }
+
+        .fi-sidebar-group-items {
+            .fi-sidebar-item-icon,
+            .fi-sidebar-item-icon svg {
+                @apply size-5 shrink-0 fill-current;
+            }
+
+            .fi-sidebar-item-label {
+                @apply flex-1;
+            }
+
+            .fi-sidebar-item-nav {
+                @apply ml-auto flex items-center justify-end gap-2;
+
+                .fi-sidebar-item-toggle {
+                    @apply text-slate-400 dark:text-slate-500;
+                }
+            }
+
+            .fi-sidebar-item {
+                @apply rounded-lg text-sm;
+
+                .fi-sidebar-item-dot {
+                    @apply size-2 rounded-full bg-slate-300 dark:bg-slate-600;
+                }
+
+                .fi-sidebar-item-link {
+                    @apply flex items-center gap-3 p-2;
+                }
+            }
+
+            > .fi-sidebar-item {
+                &:not(.fi-sidebar-item-active) {
+                    @apply text-slate-700 hover:bg-orange-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white;
+
+                    .fi-sidebar-item-icon,
+                    .fi-sidebar-item-icon svg {
+                        @apply fill-slate-400 dark:fill-slate-500;
+                    }
+                }
+
+                &:not(.fi-items-has-child).fi-sidebar-item-active {
+                    @apply relative bg-orange-50 text-orange-900 dark:bg-white/5 dark:text-white;
+
+                    &::before {
+                        content: '';
+                        @apply absolute top-1/2 -left-3 h-6 w-1 -translate-y-1/2 rounded-full bg-orange-500;
+                    }
+
+                    .fi-sidebar-item-label {
+                        @apply font-semibold;
+                    }
+                }
+
+                &.fi-items-has-child.fi-sidebar-item-active {
+                    > .fi-sidebar-item-link.fi-active {
+                        @apply relative rounded-lg bg-orange-50 text-orange-900 dark:bg-white/5 dark:text-white;
+
+                        &::before {
+                            content: '';
+                            @apply absolute top-1/2 -left-3 h-6 w-1 -translate-y-1/2 rounded-full bg-orange-500;
+                        }
+
+                        .fi-sidebar-item-icon,
+                        .fi-sidebar-item-icon svg {
+                            @apply fill-orange-900 dark:fill-white;
+                        }
+
+                        .fi-sidebar-item-label {
+                            @apply font-semibold;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.fi-si-content {
+    width: var(--sidebar-width);
+}
+
+html.sidebar-collapsed .fi-si-content,
+.fi-si-collapsed .fi-si-content {
+    width: var(--sidebar-collapsed-width);
+}

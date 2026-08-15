@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5ce855e43ec9ec9a8db12d8d5c89cbc",
+    "content-hash": "a53949c8cec57ccb61e4fa31d19a8257",
     "packages": [
         {
             "name": "awcodes/overlook",
@@ -5282,6 +5282,74 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.8.0"
             },
             "time": "2026-07-04T14:30:18+00:00"
+        },
+        {
+            "name": "northwestern-sysdev/northwestern-filament-theme",
+            "version": "v2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
+                "reference": "97bceddccf27253c2304dc1ff96c446ba5405285"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/NIT-Administrative-Systems/northwestern-filament-theme/zipball/97bceddccf27253c2304dc1ff96c446ba5405285",
+                "reference": "97bceddccf27253c2304dc1ff96c446ba5405285",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0||^5.0",
+                "illuminate/contracts": "^12.0||^13.0",
+                "php": "^8.3",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "driftingly/rector-laravel": "^2.0",
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.21",
+                "orchestra/testbench": "^10.0||^11.0",
+                "pestphp/pest": "^3.0||^4.0",
+                "rector/rector": "^2.0"
+            },
+            "suggest": {
+                "northwestern-sysdev/northwestern-laravel-ui": "Provides Northwestern brand lockup and office contact configuration automatically."
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Northwestern\\FilamentTheme\\NorthwesternThemeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Northwestern\\FilamentTheme\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Danny Foster",
+                    "email": "danny@northwestern.edu"
+                }
+            ],
+            "description": "Northwestern University branded theme for Filament panels",
+            "homepage": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme",
+            "keywords": [
+                "filament",
+                "laravel",
+                "northwestern",
+                "theme"
+            ],
+            "support": {
+                "issues": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme/issues",
+                "source": "https://github.com/NIT-Administrative-Systems/northwestern-filament-theme"
+            },
+            "time": "2026-04-10T01:12:12+00:00"
         },
         {
             "name": "nunomaduro/termwind",

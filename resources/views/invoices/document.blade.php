@@ -17,7 +17,9 @@
                 margin: 0;
                 color: #172033;
                 background: #f4f6fc;
-                font: 13px DejaVu Sans, sans-serif;
+                font:
+                    13px DejaVu Sans,
+                    sans-serif;
                 line-height: 1.55;
             }
 
@@ -287,14 +289,16 @@
                             @if ($settings->get('business_logo'))
                                 <img
                                     class="logo"
-                                    src="{{ ($print ?? false) ? asset('storage/' . $settings->get('business_logo')) : public_path('storage/' . $settings->get('business_logo')) }}"
+                                    src="{{ $print ?? false ? asset('storage/' . $settings->get('business_logo')) : public_path('storage/' . $settings->get('business_logo')) }}"
                                     alt="{{ $settings->get('business_name', config('app.name')) }}"
                                 />
                             @endif
+
                             <div class="brand-name">{{ $settings->get('business_name', config('app.name')) }}</div>
                             @if ($settings->get('business_address'))
                                 <div class="muted">{{ $settings->get('business_address') }}</div>
                             @endif
+
                             <div class="muted">
                                 {{ $settings->get('business_phone') }}
                                 @if ($settings->get('business_email'))
@@ -323,10 +327,12 @@
                             @if ($invoice->sale->customer->company_name)
                                 <div>{{ $invoice->sale->customer->company_name }}</div>
                             @endif
+
                             <div class="muted">{{ $invoice->sale->customer->phone }}</div>
                             @if ($invoice->sale->customer->email)
                                 <div class="muted">{{ $invoice->sale->customer->email }}</div>
                             @endif
+
                             @if ($invoice->sale->customer->address)
                                 <div class="muted">{{ $invoice->sale->customer->address }}</div>
                             @endif
@@ -336,7 +342,11 @@
                             <table style="margin-top: 6px">
                                 <tr>
                                     <td class="muted">Invoice date</td>
-                                    <td class="align-right"><strong>{{ $invoice->invoice_date->format(config('app.date_format')) }}</strong></td>
+                                    <td class="align-right">
+                                        <strong>
+                                            {{ $invoice->invoice_date->format(config('app.date_format')) }}
+                                        </strong>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="muted">Sale reference</td>
@@ -381,11 +391,15 @@
                             <table>
                                 <tr class="summary-row">
                                     <td class="muted">Total USD</td>
-                                    <td class="align-right"><strong>{{ number_format((float) $invoice->sale->total_usd, 2) }}</strong></td>
+                                    <td class="align-right">
+                                        <strong>{{ number_format((float) $invoice->sale->total_usd, 2) }}</strong>
+                                    </td>
                                 </tr>
                                 <tr class="grand-total">
                                     <td>Grand Total</td>
-                                    <td class="align-right">BDT {{ number_format((float) $invoice->sale->total_bdt_revenue, 2) }}</td>
+                                    <td class="align-right">
+                                        BDT {{ number_format((float) $invoice->sale->total_bdt_revenue, 2) }}
+                                    </td>
                                 </tr>
                             </table>
                         </td>
@@ -411,7 +425,9 @@
                             <div class="signature-line">
                                 <strong>{{ $settings->get('authorized_person') }}</strong>
                                 <br />
-                                <span class="muted">{{ $settings->get('signature_label', 'Authorized signature') }}</span>
+                                <span class="muted">
+                                    {{ $settings->get('signature_label', 'Authorized signature') }}
+                                </span>
                             </div>
                         </td>
                     </tr>
@@ -420,7 +436,8 @@
                 <div class="footer">
                     {{ $settings->get('invoice_footer', 'Thank you for your business.') }}
                     <br />
-                    Invoice {{ $invoice->invoice_number }} · Generated {{ now()->format(config('app.datetime_format')) }}
+                    Invoice {{ $invoice->invoice_number }} · Generated
+                    {{ now()->format(config('app.datetime_format')) }}
                 </div>
             </div>
         </main>

@@ -1,21 +1,27 @@
-MIT License
+Proprietary Software Notice
 
-Copyright (c) 2026 Ankit Kumar Singh
+Copyright (c) 2026 Moshiur Rahman. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This project and all associated source code, assets, documentation, database
+designs, business logic, layouts, and related materials are private and
+proprietary.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+No person or organization may use, copy, modify, publish, distribute,
+sublicense, resell, deploy, reverse engineer, share, or create derivative
+works from this project, in whole or in part, without prior explicit written
+permission from the author.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Any unauthorized use or access is strictly prohibited.
+
+By possessing, accessing, or using this project without authorization, you may
+be violating applicable intellectual property, copyright, confidentiality, or
+other laws.
+
+This software is provided only to explicitly authorized parties and may be
+revoked at any time by the author.
+
+For permission requests, contact:
+
+Author: Moshiur Rahman
+Email: rmedha037@gmail.com
+GitHub: https://github.com/mmrtonmoybd

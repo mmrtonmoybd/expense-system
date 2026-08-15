@@ -1,0 +1,52 @@
+.fi-sc-component-ctn {
+    @apply lg:gap-7;
+}
+
+.fi-section {
+    @apply rounded-xl bg-orange-50/80 p-1.5 ring-1 ring-orange-100/80 dark:bg-gray-950 dark:ring-white/10;
+
+    .fi-section-content {
+        @apply p-1;
+    }
+
+    .fi-section-header {
+        @apply px-2 py-3;
+    }
+
+    &.fi-collapsed .fi-section-header {
+        @apply rounded-b-xl;
+    }
+
+    .fi-section-content-ctn {
+        @apply rounded-lg border-t-0 bg-white p-4 ring-1 ring-slate-200/90 dark:bg-gray-900 dark:ring-white/10;
+    }
+
+    &:not(.fi-section-has-header) {
+        @apply rounded-none bg-transparent shadow-none ring-0 ring-transparent dark:bg-transparent;
+
+        .fi-section-content-ctn {
+            @apply p-0 shadow-none ring-0;
+        }
+    }
+}
+
+.fi-fo-repeater-item.fi-fo-repeater-item-has-header {
+    @apply bg-orange-50/80 p-1.5 ring-1 ring-orange-100/80 dark:bg-gray-950 dark:ring-white/10;
+
+    > .fi-fo-repeater-item-content {
+        @apply rounded-lg border-t-0 bg-white ring-1 ring-slate-200/90 dark:bg-gray-900 dark:ring-white/10;
+    }
+}
+
+.fi-wi-chart .fi-section,
+.fi-wi-stats-overview-stat {
+    @apply rounded-2xl;
+}
+
+.fi-wi-chart .fi-section-header {
+    @apply pb-2;
+}
+
+.fi-wi-chart .fi-section-content-ctn {
+    @apply px-4 pt-3;
+}

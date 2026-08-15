@@ -1,129 +1,93 @@
-## FilaStarter Kit
+# Expense System
 
-A Starter Kit For Filament with most necessities
-pre-configured based on personal preferences/requirements.
+Production-focused finance management system for a social media advertising agency.  
+Built with Laravel, Filament, Livewire, MySQL, and PWA support.
 
-Preview Login:
+## Author
 
-| Dark                                                                                                          | Light                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| ![](https://raw.githubusercontent.com/raugadh/fila-starter/refs/heads/master/.github/preview-login-dark.webp) | ![](https://raw.githubusercontent.com/raugadh/fila-starter/refs/heads/master/.github/preview-login-light.webp) |
+- Author: Moshiur Rahman
+- Email: rmedha037@gmail.com
+- GitHub: `mmrtonmoybd`
+- Repository: `https://github.com/mmrtonmoybd/expense-system` (private)
 
-Preview DashBoard:
+## Project Overview
 
-| Dark                                                                                                              | Light                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| ![](https://raw.githubusercontent.com/raugadh/fila-starter/refs/heads/master/.github/preview-dashboard-dark.webp) | ![](https://raw.githubusercontent.com/raugadh/fila-starter/refs/heads/master/.github/preview-dashboard-light.webp) |
+This application is designed for agencies that buy USD using BDT, maintain USD inventory using moving weighted average costing, and sell or use that USD for customer advertising on platforms like Facebook / Meta, TikTok, and Google.
 
-### Packages
+The system is built for operational finance accuracy, auditability, and day-to-day usability on desktop and mobile devices.
 
-[Laravel v12](https://github.com/laravel/laravel)  
-[Livewire v4](https://github.com/livewire/livewire)  
-[Filament v5](https://github.com/filamentphp/filament)
+## Core Business Coverage
 
-#### Packages Installed/Pre-configured
+- USD opening balance
+- USD purchases
+- USD inventory tracking
+- Moving weighted average cost calculation
+- Multi-platform customer sales
+- Sale approval workflow
+- Invoice generation
+- PDF invoice download
+- Print-friendly invoice view
+- Inventory ledger
+- Inventory adjustment
+- Sale reversal
+- Expense management
+- Employee management
+- Payroll and salary payment tracking
+- Gross profit and net profit reporting
+- Dashboard with KPI cards and charts
+- Customer and platform performance reports
+- XLSX, CSV, PDF, and print exports
+- Audit logs
+- Role and permission management
+- PWA installation support
+- Dynamic branding and settings
 
-- Filament Packages
-    - awcodes/overlook
-    - bezhansalleh/filament-shield
-    - caresome/filament-auth-designer
-    - charrafimed/global-search-modal
-    - dutchcodingcompany/filament-developer-logins
-    - jeffgreco13/filament-breezy
-    - marcelweidum/filament-expiration-notice
-    - openplain/filament-shadcn-theme (Theme)
+## Financial Rules
 
-- Other Packages
-    - barryvdh/laravel-debugbar
-    - laravel/boost
+- Primary reporting currency: BDT
+- Inventory currency: USD
+- Financial values use `DECIMAL`, never `FLOAT`
+- USD inventory costing uses moving weighted average
+- Historical posted sale cost and selling rate snapshots never change
+- Pending sales do not affect official inventory or profit
+- Posted sales update inventory, revenue, and profit
+- Overselling is blocked with backend validation and transaction locking
 
-### Compatibility
+## Technology Stack
 
-| Starter Kit | Filament Version |
-| ----------- | ---------------- |
-| **2.x**     | **_3.x_**        |
-| **3.x**     | **4.x**          |
-| **4.x**     | **5.x**          |
+- PHP 8.4
+- Laravel 13
+- Filament 5
+- Livewire 4
+- MySQL
+- Tailwind CSS 4
+- Vite
+- DomPDF
+- Laravel Excel
 
-### Installation
+## Main Modules
 
-#### Create New Project
+- Dashboard
+- Sales
+- Pending Approvals
+- Invoices
+- Customers
+- Platforms
+- USD Purchases
+- Inventory Transactions
+- Inventory Adjustment
+- Expenses
+- Expense Categories
+- Employees
+- Payrolls
+- Reports
+- Profit Predictor
+- Users
+- Roles & Permissions
+- Audit Logs
+- Settings
 
-```properties
-composer create-project --prefer-dist raugadh/fila-starter example-app
-```
-
-#### Deployment
-
-- Configure Project.
-    - Update Composer Packages
-    - Add Database Credentials
-    - Add ASSET_PREFIX if deployed application in sub-folder
-    - Link Storage
-
-        ```properties
-        php artisan storage:link
-        ```
-
-- Initialize Project
-
-    ```properties
-    php artisan project:init
-    ```
-
-- Update Permissions and Migrations
-    - Whenever new Resource , Page or migration is Added Run update command to migrate and create permissions.
-        ```properties
-        php artisan project:update
-        ```
-
-- build vite assets
-
-    ```properties
-    npm install
-    ```
-
-    ```properties
-    npm run build
-    ```
-
-- Clear/Generate New Cache
-
-    ```properties
-    php artisan project:cache
-    ```
-
-- Configure [Laravel Boost](https://github.com/laravel/boost)
-
-    ```properties
-    php artisan boost:install
-    ```
-
-##### Make sure to check custom console commands yourself and change them based on your requirements.
-
-### Lint & Fix
-
-- Pint ('test') & Prettier('check')
-
-    ```properties
-    composer lint
-    ```
-
-- Pint & Prettier('write')
-
-    ```properties
-    composer fix
-    ```
-
-#### Enjoy
-
-    Thanks for using this kit, leave a star if you found this useful.
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
-## Finance Application Setup
+## Setup
 
 ```bash
 composer install
@@ -134,13 +98,27 @@ npm install
 npm run build
 ```
 
-The optional deterministic demo dataset is guarded and only runs in `local`, `testing`, or `demo` environments:
+## Local Development
+
+```bash
+composer run dev
+```
+
+This starts:
+
+- Laravel development server
+- Queue listener
+- Vite dev server
+
+## Demo Data
+
+The demo dataset is deterministic and guarded. It is intended only for `local`, `testing`, or `demo` environments.
 
 ```bash
 php artisan db:seed --class=DemoDataSeeder
 ```
 
-All demo accounts use password `password`:
+Demo accounts use password `password`:
 
 | Role        | Email                |
 | ----------- | -------------------- |
@@ -150,4 +128,42 @@ All demo accounts use password `password`:
 | Employee    | `employee@demo.test` |
 | Normal User | `user@demo.test`     |
 
-Never run the demo seeder in production. Configure the business, invoice, approval, and PWA branding values from **Admin → Settings** after installation.
+Do not run the demo seeder in production.
+
+## Important Commands
+
+```bash
+php artisan test --compact
+vendor/bin/pint --format agent
+composer lint
+composer fix
+```
+
+## Configuration Notes
+
+- Configure business, invoice, approval, and PWA settings from the admin panel after installation.
+- Default timezone is `Asia/Dhaka`.
+- Storage link is required for branding files, invoice assets, and uploads.
+- Build assets again after frontend or theme changes:
+
+```bash
+npm run build
+```
+
+## PWA
+
+The admin panel is installable as a Progressive Web App and includes:
+
+- Web manifest
+- Service worker
+- Dynamic app icon support
+- Offline indicator
+- Safe non-queued financial posting behavior
+
+## Usage Notice
+
+This project is private and proprietary.
+
+Unauthorized use, copying, distribution, modification, resale, deployment, or access without explicit permission from the author is prohibited.
+
+See [LICENSE.md](LICENSE.md) for the full proprietary notice.

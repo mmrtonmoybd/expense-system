@@ -24,6 +24,7 @@
         "livewire/livewire": "^4.1",
         "maatwebsite/excel": "^4.0",
         "marcelweidum/filament-expiration-notice": "^1.0",
+        "northwestern-sysdev/northwestern-filament-theme": "^2.3",
         "openplain/filament-shadcn-theme": "^1.1"
     },
     "require-dev": {
