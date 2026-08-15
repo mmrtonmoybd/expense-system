@@ -60,6 +60,8 @@ final class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->databaseTransactions()
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => view('pwa.head')->render())
+            ->renderHook(PanelsRenderHook::FOOTER, fn (): string => auth()->check() ? view('filament.admin.footer')->render() : '')
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn (): string => view('filament.admin.footer')->render())
             ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER, fn (): string => view('pwa.install-button')->render())
             ->renderHook(PanelsRenderHook::BODY_END, fn (): string => view('pwa.offline-indicator')->render())
             ->assets([
@@ -92,10 +94,10 @@ final class AdminPanelProvider extends PanelProvider
                 AuthDesignerPlugin::make()
                     ->login(fn ($config) => $config
                         ->media('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
-                        ->mediaPosition(MediaPosition::Cover)
+                        ->mediaPosition(MediaPosition::Left)
                         ->blur(1)
-                    )
-                    ->themeToggle('90%', '50%'),
+                        ->mediaSize('70%')
+                    ),
                 BreezyCore::make()
                     ->myProfile(
                         hasAvatars: true,

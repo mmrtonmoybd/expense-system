@@ -62,7 +62,9 @@ final readonly class PostSaleAction
             }
 
             $newBalance = bcsub((string) $state->usd_balance, $totalUsd, 8);
-            $newValue = bcsub((string) $state->inventory_value_bdt, $cost, 2);
+            $newValue = bccomp($newBalance, '0', 8) === 0
+                ? '0.00'
+                : bcsub((string) $state->inventory_value_bdt, $cost, 2);
             $newRate = bccomp($newBalance, '0', 8) === 1 ? bcdiv($newValue, $newBalance, 8) : '0';
             $invoiceNumber = $sale->invoice_number ?: $this->invoiceNumber($sale);
             $sale->update(['invoice_number' => $invoiceNumber, 'total_usd' => $totalUsd, 'total_bdt_revenue' => $revenue, 'total_inventory_cost' => $cost, 'total_gross_profit' => bcsub($revenue, $cost, 2), 'status' => 'posted', 'approval_status' => 'approved', 'approved_by' => $user->id, 'approved_at' => now(), 'posted_at' => now()]);

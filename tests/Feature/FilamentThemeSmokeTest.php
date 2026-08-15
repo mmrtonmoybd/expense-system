@@ -11,7 +11,9 @@ uses(LazilyRefreshDatabase::class);
 test('office login page still loads after the panel theme swap', function () {
     $this->get('/login')
         ->assertOk()
-        ->assertDontSee('Northwestern');
+        ->assertDontSee('Northwestern')
+        ->assertSee('Designed and Developed By:')
+        ->assertSee('Moshiur Rahman Tonmoy');
 });
 
 test('authenticated owners can still open the dashboard with the new theme shell', function () {
@@ -25,5 +27,7 @@ test('authenticated owners can still open the dashboard with the new theme shell
         ->assertOk()
         ->assertSee('Install App')
         ->assertSee('Dashboard')
-        ->assertDontSee('Northwestern');
+        ->assertDontSee('Northwestern')
+        ->assertSee('Designed and Developed By:')
+        ->assertSee('Moshiur Rahman Tonmoy');
 });
