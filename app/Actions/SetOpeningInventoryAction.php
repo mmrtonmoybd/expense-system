@@ -7,17 +7,19 @@ namespace App\Actions;
 use App\Models\InventoryState;
 use App\Models\InventoryTransaction;
 use App\Models\User;
+use App\Services\UsdInventoryLayerService;
 use App\Support\AuditLogger;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
 final readonly class SetOpeningInventoryAction
 {
-    public function __construct(private AuditLogger $auditLogger) {}
+    public function __construct(private AuditLogger $auditLogger, private UsdInventoryLayerService $layers) {}
 
     public function execute(string $usdQuantity, string $inventoryValueBdt, User $user, string $reason): InventoryState
     {
-        if (bccomp($usdQuantity, '0', 8) !== 1 || bccomp($inventoryValueBdt, '0', 2) !== 1 || blank($reason)) {
+        if (! Money::isPositiveUsd($usdQuantity) || Money::compareBdt($inventoryValueBdt, '0') !== 1 || blank($reason)) {
             throw new LogicException('Opening USD, inventory value, and reason are required.');
         }
 
@@ -27,16 +29,25 @@ final readonly class SetOpeningInventoryAction
                 'inventory_value_bdt' => '0',
                 'weighted_average_cost' => '0',
             ]);
-            if (InventoryTransaction::query()->exists() || bccomp((string) $state->usd_balance, '0', 8) !== 0) {
+            if (InventoryTransaction::query()->exists() || ! Money::isZero($state->usd_balance)) {
                 throw new LogicException('Opening inventory can only be configured before the first inventory transaction.');
             }
 
-            $rate = bcdiv($inventoryValueBdt, $usdQuantity, 8);
+            $rate = Money::rateFor($inventoryValueBdt, $usdQuantity);
             $state->update([
                 'usd_balance' => $usdQuantity,
                 'inventory_value_bdt' => $inventoryValueBdt,
                 'weighted_average_cost' => $rate,
             ]);
+            $this->layers->record(
+                originType: 'opening_balance',
+                usdQuantity: $usdQuantity,
+                rate: $rate,
+                costBdt: $inventoryValueBdt,
+                source: $state,
+                user: $user,
+                note: $reason,
+            );
             $ledger = InventoryTransaction::query()->create([
                 'transaction_type' => 'opening_balance',
                 'source_type' => InventoryState::class,

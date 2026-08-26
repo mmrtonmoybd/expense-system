@@ -33,8 +33,8 @@ final class CustomerInfolist
                 IconEntry::make('is_active')
                     ->boolean(),
                 TextEntry::make('posted_usd_total')->label('Total USD sold')->state(fn (Customer $record): string => bcadd((string) $record->sales()->where('status', 'posted')->sum('total_usd'), '0', 8))->numeric(decimalPlaces: 2),
-                TextEntry::make('posted_revenue_total')->label('Total revenue')->state(fn (Customer $record): string => bcadd((string) $record->sales()->where('status', 'posted')->sum('total_bdt_revenue'), '0', 2))->money('BDT'),
-                ...($canViewProfit ? [TextEntry::make('posted_profit_total')->label('Total gross profit')->state(fn (Customer $record): string => bcadd((string) $record->sales()->where('status', 'posted')->sum('total_gross_profit'), '0', 2))->money('BDT')] : []),
+                TextEntry::make('posted_revenue_total')->label('Total revenue')->state(fn (Customer $record): string => bcadd((string) $record->sales()->where('status', 'posted')->sum('sell_amount'), '0', 2))->money('BDT'),
+                ...($canViewProfit ? [TextEntry::make('posted_profit_total')->label('Total gross profit')->state(fn (Customer $record): string => bcadd((string) $record->sales()->where('status', 'posted')->sum('profit_amount'), '0', 2))->money('BDT')] : []),
                 TextEntry::make('created_by')
                     ->numeric()
                     ->placeholder('-'),

@@ -16,7 +16,7 @@ final class FinancialReportService
     /** @return array<string, string> */
     public function profitAndLoss(CarbonInterface $from, CarbonInterface $to): array
     {
-        $sales = Sale::query()->where('status', 'posted')->whereDate('sale_date', '>=', $from->toDateString())->whereDate('sale_date', '<=', $to->toDateString())->selectRaw('COALESCE(SUM(total_bdt_revenue), 0) revenue, COALESCE(SUM(total_inventory_cost), 0) cost, COALESCE(SUM(total_gross_profit), 0) gross_profit')->first();
+        $sales = Sale::query()->where('status', 'posted')->whereDate('sale_date', '>=', $from->toDateString())->whereDate('sale_date', '<=', $to->toDateString())->selectRaw('COALESCE(SUM(sell_amount), 0) revenue, COALESCE(SUM(cost_amount), 0) cost, COALESCE(SUM(profit_amount), 0) gross_profit')->first();
         $revenue = bcadd((string) $sales->revenue, '0', 2);
         $cost = bcadd((string) $sales->cost, '0', 2);
         $grossProfit = bcadd((string) $sales->gross_profit, '0', 2);

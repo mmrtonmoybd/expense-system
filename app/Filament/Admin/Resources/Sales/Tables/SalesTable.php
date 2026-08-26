@@ -10,6 +10,7 @@ use App\Actions\ReverseSaleAction;
 use App\Actions\SubmitSaleAction;
 use App\Models\Sale;
 use App\Support\AuditLogger;
+use App\Support\CostingMethod;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -36,11 +37,13 @@ final class SalesTable
             TextColumn::make('total_bdt_revenue')->label('Revenue')->money('BDT')->sortable(),
             ...($canViewCosts ? [TextColumn::make('total_inventory_cost')->label('Cost')->money('BDT')->sortable()] : []),
             ...($canViewProfit ? [TextColumn::make('total_gross_profit')->label('Gross profit')->money('BDT')->sortable()] : []),
+            ...($canViewCosts ? [TextColumn::make('costing_method')->label('Costing')->badge()->color('gray')->formatStateUsing(fn (CostingMethod $state): string => $state->shortLabel())->placeholder('-')->toggleable()] : []),
             TextColumn::make('status')->badge()->color(fn (string $state): string => match ($state) {
                 'posted' => 'success', 'pending' => 'warning', 'rejected', 'reversed' => 'danger', default => 'gray'
             }),
         ])->filters([
             SelectFilter::make('status')->options(['draft' => 'Draft', 'pending' => 'Pending', 'posted' => 'Posted', 'rejected' => 'Rejected', 'reversed' => 'Reversed']),
+            SelectFilter::make('costing_method')->label('Costing method')->options(CostingMethod::options()),
             SelectFilter::make('customer_id')->relationship('customer', 'name')->searchable()->preload(),
             SelectFilter::make('platform')->relationship('lines.platform', 'name')->searchable()->preload(),
             Filter::make('sale_date')->schema([\Filament\Forms\Components\DatePicker::make('from'), \Filament\Forms\Components\DatePicker::make('until')])->query(fn (Builder $query, array $data): Builder => $query->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('sale_date', '>=', $date))->when($data['until'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('sale_date', '<=', $date))),

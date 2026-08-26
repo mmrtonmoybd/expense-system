@@ -26,7 +26,7 @@ final class AuthorizationSeeder extends Seeder
                 $permissions[] = "{$action}:{$subject}";
             }
         }
-        $custom = ['ViewProfit', 'ViewInternalCosts', 'OverrideRate:Sale', 'Post:Sale', 'Approve:Sale', 'Reject:Sale', 'Reverse:Sale', 'Post:UsdPurchase', 'Adjust:Inventory', 'Export:Report', 'View:InventoryAdjustment', 'View:PendingApprovals', 'View:ProfitPredictor', 'View:Reports', 'View:Settings', 'Manage:Settings', 'ViewPayroll', 'Pay:Payroll'];
+        $custom = ['ViewProfit', 'ViewInternalCosts', 'OverrideRate:Sale', 'Post:Sale', 'Approve:Sale', 'Reject:Sale', 'Reverse:Sale', 'Post:UsdPurchase', 'Adjust:Inventory', 'Export:Report', 'View:InventoryAdjustment', 'View:PendingApprovals', 'View:ProfitPredictor', 'View:Reports', 'View:Settings', 'Manage:Settings', 'Manage:CostingMethod', 'Manage:SellRate', 'ViewPayroll', 'Pay:Payroll'];
         foreach ([...$permissions, ...$custom] as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
@@ -37,7 +37,7 @@ final class AuthorizationSeeder extends Seeder
         $normal = Role::findOrCreate('normal_user', 'web');
         $super->syncPermissions(Permission::all());
         $owner->syncPermissions(Permission::all());
-        $admin->syncPermissions(Permission::query()->whereNotIn('name', ['Manage:Settings', 'Delete:User', 'DeleteAny:User', 'Create:User', 'Update:User', 'ViewProfit', 'ViewAny:Role', 'View:Role', 'Create:Role', 'Update:Role', 'Delete:Role', 'DeleteAny:Role'])->get());
+        $admin->syncPermissions(Permission::query()->whereNotIn('name', ['Manage:Settings', 'Manage:CostingMethod', 'Delete:User', 'DeleteAny:User', 'Create:User', 'Update:User', 'ViewProfit', 'ViewAny:Role', 'View:Role', 'Create:Role', 'Update:Role', 'Delete:Role', 'DeleteAny:Role'])->get());
         $employee->syncPermissions(Permission::query()->whereIn('name', ['ViewAny:Customer', 'View:Customer', 'Create:Customer', 'Update:Customer', 'ViewAny:Platform', 'View:Platform', 'ViewAny:Sale', 'View:Sale', 'Create:Sale', 'Update:Sale', 'Post:Sale', 'ViewAny:Invoice', 'View:Invoice'])->get());
         $normal->syncPermissions(Permission::query()->whereIn('name', ['ViewAny:Customer', 'View:Customer', 'ViewAny:Platform', 'View:Platform', 'ViewAny:Sale', 'View:Sale', 'Create:Sale', 'ViewAny:Invoice', 'View:Invoice'])->get());
         $adminUser = User::query()->where('email', 'admin@admin.com')->first();

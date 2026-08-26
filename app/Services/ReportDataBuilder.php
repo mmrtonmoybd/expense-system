@@ -230,6 +230,7 @@ final readonly class ReportDataBuilder
         )
             ->when($filters['customer_id'] ?? null, fn (Builder $query, int|string $id): Builder => $query->where('sales.customer_id', $id))
             ->when($filters['status'] ?? null, fn (Builder $query, string $status): Builder => $query->where('sales.status', $status))
+            ->when($filters['costing_method'] ?? null, fn (Builder $query, string $method): Builder => $query->where('sales.costing_method', $method))
             ->when($filters['platform_id'] ?? null, fn (Builder $query, int|string $id): Builder => $query->whereExists(
                 fn (Builder $subquery): Builder => $subquery
                     ->selectRaw('1')
@@ -237,11 +238,13 @@ final readonly class ReportDataBuilder
                     ->whereColumn('sale_lines.sale_id', 'sales.id')
                     ->where('sale_lines.platform_id', $id),
             ))
-            ->select('sale_number', 'sale_date', 'customers.name', 'customers.phone', 'total_usd', 'total_bdt_revenue', 'total_inventory_cost', 'total_gross_profit', 'sales.status');
+            ->select('sale_number', 'sale_date', 'customers.name', 'customers.phone', 'total_usd', 'sell_amount', 'cost_amount', 'profit_amount')
+            ->selectRaw("CASE sales.costing_method WHEN 'average' THEN 'Average' WHEN 'fifo' THEN 'FIFO' WHEN 'lifo' THEN 'LIFO' ELSE '-' END AS costing_method_label")
+            ->addSelect('sales.status');
 
         return $this->simple(
             'USD Sale Report',
-            ['Number', 'Date', 'Customer', 'Phone', 'USD', 'Revenue', 'Inventory Cost', 'Gross Profit', 'Status'],
+            ['Number', 'Date', 'Customer', 'Phone', 'USD', 'Revenue', 'Inventory Cost', 'Gross Profit', 'Costing Method', 'Status'],
             $query,
             $perPage,
             $page,

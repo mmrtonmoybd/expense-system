@@ -10,6 +10,7 @@ use App\Models\ExpenseCategory;
 use App\Models\Platform;
 use App\Models\User;
 use App\Services\ReportDataBuilder;
+use App\Support\CostingMethod;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -87,7 +88,7 @@ final class Reports extends Page
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function (Set $set): void {
-                                        foreach (['customer_id', 'platform_id', 'expense_category_id', 'employee_id', 'user_id', 'status'] as $field) {
+                                        foreach (['customer_id', 'platform_id', 'expense_category_id', 'employee_id', 'user_id', 'status', 'costing_method'] as $field) {
                                             $set($field, null);
                                         }
                                     }),
@@ -105,6 +106,11 @@ final class Reports extends Page
                                 $this->expenseCategorySelect(),
                                 $this->employeeSelect(),
                                 $this->userSelect(),
+                                Select::make('costing_method')
+                                    ->label('Costing method')
+                                    ->placeholder('All')
+                                    ->options(CostingMethod::options())
+                                    ->visible(fn (Get $get): bool => $get('report') === 'sales'),
                                 Select::make('status')
                                     ->label(fn (Get $get): string => $get('report') === 'inventory' ? 'Transaction type' : 'Status')
                                     ->options(fn (Get $get): array => $this->statusOptions((string) $get('report')))

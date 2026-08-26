@@ -9,15 +9,23 @@ use App\Models\InventoryState;
 use App\Models\InventoryTransaction;
 use App\Models\Invoice;
 use App\Models\Sale;
+use App\Models\SaleCostAllocation;
+use App\Models\SaleLine;
 use App\Models\User;
+use App\Services\UsdCostingService;
 use App\Support\AuditLogger;
+use App\Support\Money;
 use App\Support\SettingsRepository;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
 final readonly class PostSaleAction
 {
-    public function __construct(private AuditLogger $auditLogger, private SettingsRepository $settings) {}
+    public function __construct(
+        private AuditLogger $auditLogger,
+        private SettingsRepository $settings,
+        private UsdCostingService $costing,
+    ) {}
 
     public function execute(Sale $sale, User $user): Sale
     {
@@ -30,7 +38,7 @@ final readonly class PostSaleAction
 
             $totalUsd = '0';
             foreach ($sale->lines as $line) {
-                if (bccomp((string) $line->usd_quantity, '0', 8) !== 1 || bccomp((string) $line->selling_rate, '0', 8) !== 1) {
+                if (! Money::isPositiveUsd($line->usd_quantity) || ! Money::isPositiveUsd($line->selling_rate)) {
                     throw new LogicException('Every sale line requires positive USD quantity and selling rate.');
                 }
                 $assignmentExists = CustomerPlatform::query()
@@ -40,41 +48,93 @@ final readonly class PostSaleAction
                 if (! $assignmentExists) {
                     throw new LogicException('Every platform line must be assigned to the selected customer.');
                 }
-                $totalUsd = bcadd($totalUsd, (string) $line->usd_quantity, 8);
+                $totalUsd = Money::addUsd($totalUsd, $line->usd_quantity);
             }
 
             $state = InventoryState::query()->lockForUpdate()->firstOrCreate([], [
                 'usd_balance' => '0', 'inventory_value_bdt' => '0', 'weighted_average_cost' => '0',
             ]);
-            if (bccomp($totalUsd, (string) $state->usd_balance, 8) === 1) {
+            if (Money::compareUsd($totalUsd, $state->usd_balance) === 1) {
                 throw new LogicException("You only have {$state->usd_balance} USD available. This sale requires {$totalUsd}.");
             }
 
-            $costRate = (string) $state->weighted_average_cost;
+            $costing = $this->costing->costSale($sale->lines, $totalUsd, $state);
+            $method = $costing['method'];
             $revenue = '0';
             $cost = '0';
+
             foreach ($sale->lines as $line) {
-                $lineRevenue = bcmul((string) $line->usd_quantity, (string) $line->selling_rate, 2);
-                $lineCost = bcmul((string) $line->usd_quantity, $costRate, 2);
-                $line->update(['weighted_cost_rate' => $costRate, 'revenue' => $lineRevenue, 'inventory_cost' => $lineCost, 'gross_profit' => bcsub($lineRevenue, $lineCost, 2)]);
-                $revenue = bcadd($revenue, $lineRevenue, 2);
-                $cost = bcadd($cost, $lineCost, 2);
+                $lineCosting = $costing['lines'][(int) $line->getKey()];
+                $lineRevenue = Money::amount($line->usd_quantity, $line->selling_rate);
+                $lineCost = $lineCosting['cost_amount'];
+                $line->update([
+                    'costing_method' => $method,
+                    'weighted_cost_rate' => $lineCosting['cost_rate'],
+                    'revenue' => $lineRevenue,
+                    'inventory_cost' => $lineCost,
+                    'gross_profit' => Money::subBdt($lineRevenue, $lineCost),
+                ]);
+                $this->storeAllocations($sale, $line, $method->value, $lineCosting['allocations']);
+                $revenue = Money::addBdt($revenue, $lineRevenue);
+                $cost = Money::addBdt($cost, $lineCost);
             }
 
-            $newBalance = bcsub((string) $state->usd_balance, $totalUsd, 8);
-            $newValue = bccomp($newBalance, '0', 8) === 0
-                ? '0.00'
-                : bcsub((string) $state->inventory_value_bdt, $cost, 2);
-            $newRate = bccomp($newBalance, '0', 8) === 1 ? bcdiv($newValue, $newBalance, 8) : '0';
+            $newBalance = Money::subUsd($state->usd_balance, $totalUsd);
+            $newValue = Money::isZero($newBalance)
+                ? Money::bdt('0')
+                : Money::subBdt($state->inventory_value_bdt, $cost);
+            $newRate = Money::isPositiveUsd($newBalance) ? Money::rateFor($newValue, $newBalance) : Money::rate('0');
+            $costRate = $costing['cost_rate'];
+            $profit = Money::subBdt($revenue, $cost);
             $invoiceNumber = $sale->invoice_number ?: $this->invoiceNumber($sale);
-            $sale->update(['invoice_number' => $invoiceNumber, 'total_usd' => $totalUsd, 'total_bdt_revenue' => $revenue, 'total_inventory_cost' => $cost, 'total_gross_profit' => bcsub($revenue, $cost, 2), 'status' => 'posted', 'approval_status' => 'approved', 'approved_by' => $user->id, 'approved_at' => now(), 'posted_at' => now()]);
+            $sale->update([
+                'invoice_number' => $invoiceNumber,
+                'total_usd' => $totalUsd,
+                'total_bdt_revenue' => $revenue,
+                'total_inventory_cost' => $cost,
+                'total_gross_profit' => $profit,
+                'costing_method' => $method,
+                'cost_rate' => $costRate,
+                'cost_amount' => $cost,
+                'sell_rate' => Money::rateFor($revenue, $totalUsd),
+                'sell_amount' => $revenue,
+                'profit_amount' => $profit,
+                'costing_calculated_at' => now(),
+                'status' => 'posted',
+                'approval_status' => 'approved',
+                'approved_by' => $user->id,
+                'approved_at' => now(),
+                'posted_at' => now(),
+            ]);
             $state->update(['usd_balance' => $newBalance, 'inventory_value_bdt' => $newValue, 'weighted_average_cost' => $newRate]);
             InventoryTransaction::query()->create(['transaction_type' => 'sale', 'source_type' => Sale::class, 'source_id' => $sale->id, 'usd_out' => $totalUsd, 'cost_rate' => $costRate, 'bdt_value_out' => $cost, 'resulting_usd_balance' => $newBalance, 'resulting_inventory_value_bdt' => $newValue, 'resulting_weighted_average_cost' => $newRate, 'created_by' => $user->id, 'occurred_at' => now(), 'note' => $sale->note]);
             Invoice::query()->firstOrCreate(['sale_id' => $sale->id], ['invoice_number' => $invoiceNumber, 'invoice_date' => $sale->sale_date, 'status' => 'issued']);
-            $this->auditLogger->record($user, 'sale_posted', $sale, newValues: ['total_usd' => $totalUsd, 'revenue' => $revenue, 'inventory_cost' => $cost]);
+            $this->auditLogger->record($user, 'sale_posted', $sale, newValues: ['total_usd' => $totalUsd, 'revenue' => $revenue, 'inventory_cost' => $cost, 'costing_method' => $method->value, 'cost_rate' => $costRate]);
 
             return $sale->refresh()->load('lines', 'invoice');
         }, attempts: 5);
+    }
+
+    /**
+     * Persist the inventory layers a FIFO/LIFO line consumed so the cost stays auditable.
+     *
+     * @param  array<int, array{layer_id:int,usd_purchase_id:int|null,quantity:string,rate:string,cost:string}>  $allocations
+     */
+    private function storeAllocations(Sale $sale, SaleLine $line, string $method, array $allocations): void
+    {
+        foreach ($allocations as $allocation) {
+            SaleCostAllocation::query()->create([
+                'sale_id' => $sale->id,
+                'sale_line_id' => $line->id,
+                'inventory_layer_id' => $allocation['layer_id'],
+                'usd_purchase_id' => $allocation['usd_purchase_id'],
+                'costing_method' => $method,
+                'quantity_used' => $allocation['quantity'],
+                'purchase_rate' => $allocation['rate'],
+                'cost_amount' => $allocation['cost'],
+                'consumed_at' => now(),
+            ]);
+        }
     }
 
     private function invoiceNumber(Sale $sale): string

@@ -143,7 +143,7 @@ test('partial remaining inventory alone influences the next weighted average', f
 
     expect(InventoryState::query()->sole()->usd_balance)->toBe('1100.00000000')
         ->and(InventoryState::query()->sole()->inventory_value_bdt)->toBe('170000.00')
-        ->and(InventoryState::query()->sole()->weighted_average_cost)->toBe('154.54545454');
+        ->and(InventoryState::query()->sole()->weighted_average_cost)->toBe('154.54545455');
 });
 
 test('first purchase after zero inventory starts a fresh average cost', function () {
