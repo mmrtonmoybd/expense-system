@@ -34,9 +34,24 @@ final class InventoryAdjustment extends Page
 
     protected string $view = 'filament.admin.pages.inventory-adjustment';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('panel.pages.inventory_adjustment');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Inventory');
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()?->can('View:InventoryAdjustment') ?? false;
+    }
+
+    public function getTitle(): string
+    {
+        return __('panel.pages.inventory_adjustment');
     }
 
     public function mount(): void

@@ -24,11 +24,7 @@ final readonly class SetOpeningInventoryAction
         }
 
         return DB::transaction(function () use ($usdQuantity, $inventoryValueBdt, $user, $reason): InventoryState {
-            $state = InventoryState::query()->lockForUpdate()->firstOrCreate([], [
-                'usd_balance' => '0',
-                'inventory_value_bdt' => '0',
-                'weighted_average_cost' => '0',
-            ]);
+            $state = InventoryState::locked();
             if (InventoryTransaction::query()->exists() || ! Money::isZero($state->usd_balance)) {
                 throw new LogicException('Opening inventory can only be configured before the first inventory transaction.');
             }

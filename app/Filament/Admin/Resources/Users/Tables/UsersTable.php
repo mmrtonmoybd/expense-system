@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Users\Tables;
 
+use App\Filament\Admin\Actions\GuardedBulkAction;
+use App\Filament\Admin\Filters\DateRangeFilter;
+use App\Models\User;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 final class UsersTable
@@ -68,16 +75,53 @@ final class UsersTable
                 ]),
             ])
             ->filters([
-                //
+                SelectFilter::make('roles')
+                    ->label('Roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                TernaryFilter::make('email_verified_at')
+                    ->label('Email verified')
+                    ->nullable()
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('email_verified_at'),
+                        false: fn (Builder $query): Builder => $query->whereNull('email_verified_at'),
+                    ),
+                TernaryFilter::make('has_roles')
+                    ->label('Has any role')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereHas('roles'),
+                        false: fn (Builder $query): Builder => $query->whereDoesntHave('roles'),
+                    ),
+                TernaryFilter::make('avatar_url')
+                    ->label('Has an avatar')
+                    ->nullable()
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('avatar_url'),
+                        false: fn (Builder $query): Builder => $query->whereNull('avatar_url'),
+                    ),
+                DateRangeFilter::make('created_at', 'Registered', timestamp: true),
             ])
             ->recordActions([
-                ViewAction::make()->label(''),
-                EditAction::make()->label(''),
-                DeleteAction::make()->label(''),
-            ])
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()->visible(fn (User $record): bool => $record->getKey() !== auth()->id()),
+                ]),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    GuardedBulkAction::make(
+                        name: 'bulkDelete',
+                        label: 'Delete',
+                        icon: Heroicon::Trash,
+                        color: 'danger',
+                        eligible: fn (User $record): bool => $record->getKey() !== auth()->id(),
+                        handle: fn (User $record): mixed => $record->delete(),
+                        ability: 'DeleteAny:User',
+                        skipReason: 'you cannot delete your own account',
+                    ),
                 ]),
             ]);
     }

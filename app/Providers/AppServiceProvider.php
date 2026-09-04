@@ -13,7 +13,9 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\VerticalAlignment;
+use Filament\Support\Enums\Width;
 use Filament\Support\Facades\FilamentTimezone;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
@@ -40,10 +42,21 @@ final class AppServiceProvider extends ServiceProvider
         $dateTimeSecondsFormat = (string) config('app.datetime_seconds_format');
 
         FilamentTimezone::set((string) config('app.timezone'));
+        // Every table gets the same filtering behaviour: filters live in a modal, apply as
+        // soon as they change so the summary widgets follow along, and survive a page reload.
         Table::configureUsing(fn (Table $table): Table => $table
             ->defaultDateDisplayFormat($dateFormat)
             ->defaultDateTimeDisplayFormat($dateTimeFormat)
-            ->defaultTimeDisplayFormat($timeFormat));
+            ->defaultTimeDisplayFormat($timeFormat)
+            ->filtersLayout(FiltersLayout::Modal)
+            ->filtersFormColumns(['default' => 1, 'sm' => 2, 'xl' => 3])
+            ->filtersFormWidth(Width::FiveExtraLarge)
+            ->filtersFormMaxHeight('32rem')
+            ->deferFilters(false)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistColumnSearchesInSession()
+            ->persistSortInSession());
         Schema::configureUsing(fn (Schema $schema): Schema => $schema
             ->defaultDateDisplayFormat($dateFormat)
             ->defaultDateTimeDisplayFormat($dateTimeFormat)

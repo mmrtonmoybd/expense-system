@@ -6,7 +6,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Admin\Resources\Users\UserResource;
+use App\Http\Middleware\SetApplicationLocale;
 use App\Models\User;
+use App\Support\Localization;
 use App\Support\SettingsRepository;
 use Awcodes\Overlook\OverlookPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -14,6 +16,7 @@ use Caresome\FilamentAuthDesigner\AuthDesignerPlugin;
 use Caresome\FilamentAuthDesigner\Enums\MediaPosition;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
+use Filament\Actions\Action;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -46,8 +49,14 @@ final class AdminPanelProvider extends PanelProvider
             ->path('')
             ->authGuard('web')
             ->spa()
-            ->spaUrlExceptions([
+            ->spaUrlExceptions(fn (): array => [
                 Dashboard::class,
+                // Routes that answer with a file, not a page. SPA mode otherwise puts
+                // wire:navigate on their links, and Livewire fetches the response and swaps
+                // it into the document, so the browser shows the raw PDF bytes as text.
+                url('/invoices/*/pdf'),
+                url('/invoices/*/print'),
+                url('/reports/export/*'),
             ])
             ->login()
             ->brandName(fn (): string => (string) app(SettingsRepository::class)->get('business_name', config('app.name')))
@@ -66,6 +75,14 @@ final class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::BODY_END, fn (): string => view('pwa.offline-indicator')->render())
             ->assets([
                 Js::make('pwa-install', resource_path('js/pwa-install.js')),
+            ])
+            ->userMenuItems([
+                // One click to read the whole panel, and anything printed from it, in the
+                // other language. The choice is remembered for the session.
+                Action::make('switchLanguage')
+                    ->label(fn (): string => Localization::isBengali() ? 'English' : 'বাংলা')
+                    ->icon(Heroicon::Language)
+                    ->url(fn (): string => request()->fullUrlWithQuery(['lang' => Localization::isBengali() ? 'en' : 'bn'])),
             ])
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
@@ -141,6 +158,9 @@ final class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                // The panel has its own middleware stack, so the app's web group does not
+                // reach it; the language has to be resolved here as well.
+                SetApplicationLocale::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,

@@ -77,7 +77,8 @@ test('profit and loss excludes purchases and counts salary expense once', functi
         'status' => 'partially_paid',
     ]);
 
-    $report = app(FinancialReportService::class)->profitAndLoss(today(), today());
+    // A whole calendar month, so the month's payroll is accrued in full exactly once.
+    $report = app(FinancialReportService::class)->profitAndLoss(today()->startOfMonth(), today()->endOfMonth());
 
     expect($report)->toMatchArray([
         'revenue' => '12200.00',

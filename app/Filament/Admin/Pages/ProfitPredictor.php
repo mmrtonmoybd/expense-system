@@ -31,13 +31,28 @@ final class ProfitPredictor extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Reports';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     protected string $view = 'filament.admin.pages.profit-predictor';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('panel.pages.profit_predictor');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Reports');
+    }
 
     public static function canAccess(): bool
     {
         return auth()->user()?->can('View:ProfitPredictor') ?? false;
+    }
+
+    public function getTitle(): string
+    {
+        return __('panel.pages.profit_predictor');
     }
 
     public function mount(): void

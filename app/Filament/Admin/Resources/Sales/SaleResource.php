@@ -11,6 +11,9 @@ use App\Filament\Admin\Resources\Sales\Pages\ViewSale;
 use App\Filament\Admin\Resources\Sales\Schemas\SaleForm;
 use App\Filament\Admin\Resources\Sales\Schemas\SaleInfolist;
 use App\Filament\Admin\Resources\Sales\Tables\SalesTable;
+use App\Filament\Admin\Resources\Sales\Widgets\SaleBreakdownChart;
+use App\Filament\Admin\Resources\Sales\Widgets\SaleStatsOverview;
+use App\Filament\Admin\Resources\Sales\Widgets\SaleTrendChart;
 use App\Models\Sale;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -32,6 +35,21 @@ final class SaleResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'sale_number';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.sale.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.sale.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Sales');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -83,6 +101,15 @@ final class SaleResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            SaleBreakdownChart::class,
+            SaleStatsOverview::class,
+            SaleTrendChart::class,
         ];
     }
 

@@ -6,10 +6,13 @@ namespace App\Filament\Admin\Resources\Customers\RelationManagers;
 
 use App\Actions\AssignCustomerPlatformAction;
 use App\Actions\UpdateCustomerPlatformRateAction;
+use App\Filament\Admin\Filters\DateRangeFilter;
+use App\Filament\Admin\Filters\NumberRangeFilter;
 use App\Models\Customer;
 use App\Models\CustomerPlatform;
 use App\Models\Platform;
 use App\Models\User;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -18,6 +21,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
 
@@ -71,6 +76,11 @@ final class CustomerPlatformsRelationManager extends RelationManager
                 TextColumn::make('note')->label('Reason / note')->placeholder('-')->wrap(),
                 TextColumn::make('updated_at')->label('Effective')->dateTime()->sortable(),
             ])
+            ->filters([
+                SelectFilter::make('platform_id')->label('Platform')->relationship('platform', 'name')->multiple()->searchable()->preload(),
+                NumberRangeFilter::make('current_selling_rate', 'Selling rate', '৳'),
+                DateRangeFilter::make('updated_at', 'Effective', timestamp: true),
+            ])
             ->headerActions([
                 CreateAction::make()
                     ->label('Attach platform')
@@ -84,15 +94,17 @@ final class CustomerPlatformsRelationManager extends RelationManager
                     )),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->visible(fn (): bool => Gate::forUser($this->user())->allows('update', $this->customer()))
-                    ->using(fn (CustomerPlatform $record, array $data): CustomerPlatform => app(UpdateCustomerPlatformRateAction::class)->execute(
-                        $record,
-                        (string) $data['current_selling_rate'],
-                        $this->user(),
-                        $data['note'] ?? null,
-                    )),
-            ]);
+                ActionGroup::make([
+                    EditAction::make()
+                        ->visible(fn (): bool => Gate::forUser($this->user())->allows('update', $this->customer()))
+                        ->using(fn (CustomerPlatform $record, array $data): CustomerPlatform => app(UpdateCustomerPlatformRateAction::class)->execute(
+                            $record,
+                            (string) $data['current_selling_rate'],
+                            $this->user(),
+                            $data['note'] ?? null,
+                        )),
+                ]),
+            ], position: RecordActionsPosition::BeforeColumns);
     }
 
     private function customer(): Customer

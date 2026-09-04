@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\Users\Pages\ViewUser;
 use App\Filament\Admin\Resources\Users\Schemas\UserForm;
 use App\Filament\Admin\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Admin\Resources\Users\Tables\UsersTable;
+use App\Filament\Admin\Resources\Users\Widgets\UserStatsOverview;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -30,6 +31,16 @@ final class UserResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.user.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.user.plural');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -60,6 +71,13 @@ final class UserResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            UserStatsOverview::class,
         ];
     }
 

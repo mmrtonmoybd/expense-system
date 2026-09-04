@@ -33,6 +33,16 @@ final class PendingApprovals extends Page implements HasTable
 
     protected string $view = 'filament.admin.pages.pending-approvals';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('panel.pages.pending_approvals');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Sales');
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()?->can('View:PendingApprovals') ?? false;
@@ -47,6 +57,11 @@ final class PendingApprovals extends Page implements HasTable
         $count = Sale::query()->where('status', 'pending')->count();
 
         return $count ? (string) $count : null;
+    }
+
+    public function getTitle(): string
+    {
+        return __('panel.pages.pending_approvals');
     }
 
     public function table(Table $table): Table

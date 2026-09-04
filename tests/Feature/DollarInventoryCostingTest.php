@@ -207,7 +207,7 @@ test('profit reports sum sale snapshots rather than mutable legacy totals or cur
         ->and($filtered['rows'][0][9])->toBe('posted');
 });
 
-test('dashboard shows the configured operational sell rate separately from inventory cost', function () {
+test('the operational sell rate is tracked separately from inventory cost', function () {
     $user = costingUser(['Manage:SellRate', 'ViewProfit', 'ViewInternalCosts']);
     $this->actingAs($user);
     postCostingPurchase($user, '1000.00000000', '118.70000000');
@@ -217,11 +217,12 @@ test('dashboard shows the configured operational sell rate separately from inven
         ->and(app(UsdSellRateService::class)->currentRate())->not->toBe(InventoryState::query()->sole()->weighted_average_cost)
         ->and(UsdSellRate::query()->sole()->rate)->toBe('125.50000000');
 
+    // The sell rate lives in Settings, not on the dashboard; the dashboard reports cost.
     Livewire::test(FinanceStats::class)
-        ->assertSee('Current dollar sell rate')
-        ->assertSee('৳ 125.50 / USD')
         ->assertSee('Current inventory cost')
-        ->assertSee('৳ 118.7000');
+        ->assertSee('৳ 118.7000')
+        ->assertDontSee('Current dollar sell rate')
+        ->assertDontSee('৳ 125.50 / USD');
 });
 
 test('dashboard sell rate falls back to the latest valid posted sale rate when unset', function () {

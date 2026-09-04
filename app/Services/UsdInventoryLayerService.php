@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\InventoryLayer;
+use App\Models\SaleCostAllocation;
 use App\Models\User;
 use App\Support\CostingMethod;
 use App\Support\Money;
@@ -107,6 +108,50 @@ final class UsdInventoryLayerService
         }
 
         return $consumed;
+    }
+
+    /**
+     * Put consumed quantity and cost back onto the exact layers a sale drew from.
+     *
+     * A reversal has to leave the queue as it was before the sale, otherwise the returned
+     * dollars would be re-priced at the wrong end of the FIFO/LIFO order and the next sale
+     * would take a cost that never happened.
+     *
+     * @param  Collection<int, SaleCostAllocation>  $allocations
+     * @return array{quantity:string,cost:string} the position handed back to inventory
+     */
+    public function restore(Collection $allocations): array
+    {
+        $quantity = Money::usd('0');
+        $cost = Money::bdt('0');
+
+        foreach ($allocations->groupBy('inventory_layer_id') as $layerId => $group) {
+            $layer = InventoryLayer::query()->lockForUpdate()->find($layerId);
+
+            if ($layer === null) {
+                throw new LogicException('The inventory layer this sale consumed no longer exists, so the sale cannot be reversed.');
+            }
+
+            $layerQuantity = $group->reduce(
+                fn (string $carry, SaleCostAllocation $allocation): string => Money::addUsd($carry, (string) $allocation->quantity_used),
+                Money::usd('0'),
+            );
+            $layerCost = $group->reduce(
+                fn (string $carry, SaleCostAllocation $allocation): string => Money::addBdt($carry, (string) $allocation->cost_amount),
+                Money::bdt('0'),
+            );
+
+            $layer->update([
+                'remaining_quantity' => Money::addUsd($layer->remaining_quantity, $layerQuantity),
+                'remaining_cost_bdt' => Money::addBdt($layer->remaining_cost_bdt, $layerCost),
+                'is_closed' => false,
+            ]);
+
+            $quantity = Money::addUsd($quantity, $layerQuantity);
+            $cost = Money::addBdt($cost, $layerCost);
+        }
+
+        return ['quantity' => $quantity, 'cost' => $cost];
     }
 
     /** Total USD still held across all open layers. */

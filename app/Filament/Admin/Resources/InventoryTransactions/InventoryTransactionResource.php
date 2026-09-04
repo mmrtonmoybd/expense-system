@@ -8,6 +8,8 @@ use App\Filament\Admin\Resources\InventoryTransactions\Pages\ListInventoryTransa
 use App\Filament\Admin\Resources\InventoryTransactions\Pages\ViewInventoryTransaction;
 use App\Filament\Admin\Resources\InventoryTransactions\Schemas\InventoryTransactionInfolist;
 use App\Filament\Admin\Resources\InventoryTransactions\Tables\InventoryTransactionsTable;
+use App\Filament\Admin\Resources\InventoryTransactions\Widgets\InventoryFlowChart;
+use App\Filament\Admin\Resources\InventoryTransactions\Widgets\InventoryFlowStatsOverview;
 use App\Models\InventoryTransaction;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -26,6 +28,21 @@ final class InventoryTransactionResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.inventory_transaction.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.inventory_transaction.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Inventory');
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return InventoryTransactionInfolist::configure($schema);
@@ -40,6 +57,14 @@ final class InventoryTransactionResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            InventoryFlowStatsOverview::class,
+            InventoryFlowChart::class,
         ];
     }
 

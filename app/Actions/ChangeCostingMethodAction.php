@@ -38,9 +38,7 @@ final readonly class ChangeCostingMethodAction
         Gate::forUser($user)->authorize('Manage:CostingMethod');
 
         return DB::transaction(function () use ($method, $user, $reason): CostingMethodChange {
-            $state = InventoryState::query()->lockForUpdate()->firstOrCreate([], [
-                'usd_balance' => '0', 'inventory_value_bdt' => '0', 'weighted_average_cost' => '0',
-            ]);
+            $state = InventoryState::locked();
             $current = $this->costing->activeMethod();
 
             if ($current === $method) {

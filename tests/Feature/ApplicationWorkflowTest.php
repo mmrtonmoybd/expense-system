@@ -146,7 +146,7 @@ test('payroll partial payments never duplicate salary expense', function () {
 });
 
 test('profit predictor calculates projection and target rate without transactions', function () {
-    InventoryState::query()->create([
+    InventoryState::locked()->update([
         'usd_balance' => '1000',
         'inventory_value_bdt' => '112000',
         'weighted_average_cost' => '112',

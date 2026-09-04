@@ -8,6 +8,8 @@ use App\Filament\Admin\Resources\AuditLogs\Pages\ListAuditLogs;
 use App\Filament\Admin\Resources\AuditLogs\Pages\ViewAuditLog;
 use App\Filament\Admin\Resources\AuditLogs\Schemas\AuditLogInfolist;
 use App\Filament\Admin\Resources\AuditLogs\Tables\AuditLogsTable;
+use App\Filament\Admin\Resources\AuditLogs\Widgets\AuditActionChart;
+use App\Filament\Admin\Resources\AuditLogs\Widgets\AuditLogStatsOverview;
 use App\Models\AuditLog;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -26,6 +28,21 @@ final class AuditLogResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.audit_log.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.audit_log.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Administration');
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return AuditLogInfolist::configure($schema);
@@ -40,6 +57,14 @@ final class AuditLogResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            AuditLogStatsOverview::class,
+            AuditActionChart::class,
         ];
     }
 

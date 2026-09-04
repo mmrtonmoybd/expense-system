@@ -14,6 +14,10 @@ use App\Filament\Admin\Resources\Customers\RelationManagers\SalesRelationManager
 use App\Filament\Admin\Resources\Customers\Schemas\CustomerForm;
 use App\Filament\Admin\Resources\Customers\Schemas\CustomerInfolist;
 use App\Filament\Admin\Resources\Customers\Tables\CustomersTable;
+use App\Filament\Admin\Resources\Customers\Widgets\CustomerAccountStats;
+use App\Filament\Admin\Resources\Customers\Widgets\CustomerRevenueChart;
+use App\Filament\Admin\Resources\Customers\Widgets\CustomerSalesTrendChart;
+use App\Filament\Admin\Resources\Customers\Widgets\CustomerStatsOverview;
 use App\Models\Customer;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -34,6 +38,21 @@ final class CustomerResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.customer.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.customer.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Customers');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -71,6 +90,16 @@ final class CustomerResource extends Resource
             CustomerPlatformsRelationManager::class,
             RateHistoriesRelationManager::class,
             SalesRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            CustomerAccountStats::class,
+            CustomerSalesTrendChart::class,
+            CustomerStatsOverview::class,
+            CustomerRevenueChart::class,
         ];
     }
 

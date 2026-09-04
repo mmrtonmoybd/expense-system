@@ -36,11 +36,20 @@ final readonly class PostSaleAction
                 throw new LogicException('Only unposted sales can be posted.');
             }
 
+            if ($sale->lines->isEmpty()) {
+                throw new LogicException('A sale must contain at least one platform line.');
+            }
+
             $totalUsd = '0';
+            $seenPlatforms = [];
             foreach ($sale->lines as $line) {
                 if (! Money::isPositiveUsd($line->usd_quantity) || ! Money::isPositiveUsd($line->selling_rate)) {
                     throw new LogicException('Every sale line requires positive USD quantity and selling rate.');
                 }
+                if (isset($seenPlatforms[$line->platform_id])) {
+                    throw new LogicException('A platform may only appear once in a sale.');
+                }
+                $seenPlatforms[$line->platform_id] = true;
                 $assignmentExists = CustomerPlatform::query()
                     ->where('customer_id', $sale->customer_id)
                     ->where('platform_id', $line->platform_id)
@@ -51,9 +60,7 @@ final readonly class PostSaleAction
                 $totalUsd = Money::addUsd($totalUsd, $line->usd_quantity);
             }
 
-            $state = InventoryState::query()->lockForUpdate()->firstOrCreate([], [
-                'usd_balance' => '0', 'inventory_value_bdt' => '0', 'weighted_average_cost' => '0',
-            ]);
+            $state = InventoryState::locked();
             if (Money::compareUsd($totalUsd, $state->usd_balance) === 1) {
                 throw new LogicException("You only have {$state->usd_balance} USD available. This sale requires {$totalUsd}.");
             }

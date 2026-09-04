@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\UsdCostingService;
 use App\Services\UsdInventoryLayerService;
 use App\Support\AuditLogger;
+use App\Support\CostingMethod;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -25,11 +26,7 @@ final readonly class AdjustInventoryAction
         }
 
         return DB::transaction(function () use ($type, $usdQuantity, $user, $reason): InventoryState {
-            $state = InventoryState::query()->lockForUpdate()->firstOrCreate([], [
-                'usd_balance' => '0',
-                'inventory_value_bdt' => '0',
-                'weighted_average_cost' => '0',
-            ]);
+            $state = InventoryState::locked();
             if ($type === 'negative_adjustment' && Money::compareUsd($usdQuantity, $state->usd_balance) === 1) {
                 throw new LogicException("You only have {$state->usd_balance} USD available.");
             }
@@ -37,6 +34,7 @@ final readonly class AdjustInventoryAction
             $rate = Money::rate($state->weighted_average_cost);
             $value = Money::amount($usdQuantity, $rate);
             $isIncrease = $type === 'positive_adjustment';
+            $method = $this->costing->activeMethod();
 
             if ($isIncrease) {
                 $this->layers->record(
@@ -49,10 +47,17 @@ final readonly class AdjustInventoryAction
                     note: $reason,
                 );
             } else {
-                $value = collect($this->layers->consume($usdQuantity, $this->costing->activeMethod()))->reduce(
+                $consumedCost = collect($this->layers->consume($usdQuantity, $method))->reduce(
                     fn (string $carry, array $allocation): string => Money::addBdt($carry, $allocation['cost']),
                     '0',
                 );
+
+                // Under a moving average the outflow is always valued at the average, exactly
+                // like a sale. Layers are still consumed so their quantity keeps matching the
+                // authoritative balance. FIFO/LIFO use the real cost of the layers consumed.
+                if ($method !== CostingMethod::Average) {
+                    $value = $consumedCost;
+                }
             }
 
             $newBalance = $isIncrease ? Money::addUsd($state->usd_balance, $usdQuantity) : Money::subUsd($state->usd_balance, $usdQuantity);

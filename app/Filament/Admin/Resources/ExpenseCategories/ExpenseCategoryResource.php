@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\ExpenseCategories\Pages\ViewExpenseCategory;
 use App\Filament\Admin\Resources\ExpenseCategories\Schemas\ExpenseCategoryForm;
 use App\Filament\Admin\Resources\ExpenseCategories\Schemas\ExpenseCategoryInfolist;
 use App\Filament\Admin\Resources\ExpenseCategories\Tables\ExpenseCategoriesTable;
+use App\Filament\Admin\Resources\ExpenseCategories\Widgets\ExpenseCategoryStatsOverview;
 use App\Models\ExpenseCategory;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -28,6 +29,21 @@ final class ExpenseCategoryResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Expenses';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.expense_category.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.expense_category.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Expenses');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -48,6 +64,13 @@ final class ExpenseCategoryResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            ExpenseCategoryStatsOverview::class,
         ];
     }
 

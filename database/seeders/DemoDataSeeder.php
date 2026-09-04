@@ -23,6 +23,8 @@ use App\Models\SaleLine;
 use App\Models\Setting;
 use App\Models\UsdPurchase;
 use App\Models\User;
+use App\Support\Money;
+use App\Support\PayrollCalculator;
 use App\Support\TransactionNumberGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -104,12 +106,12 @@ final class DemoDataSeeder extends Seeder
                 $month = now()->subMonths($monthOffset)->startOfMonth()->toDateString();
                 $bonus = $employeeIndex === 0 && $monthOffset === 1 ? 5000 : 0;
                 $deduction = $employeeIndex === 3 && $monthOffset === 2 ? 1000 : 0;
-                $total = bcsub(bcadd((string) $employee->current_salary, (string) $bonus, 2), (string) $deduction, 2);
+                $total = app(PayrollCalculator::class)->total(['base_salary' => (string) $employee->current_salary, 'bonus' => (string) $bonus, 'deduction' => (string) $deduction]);
                 $payroll = Payroll::query()->create(['payroll_number' => app(TransactionNumberGenerator::class)->next('payroll', $month), 'employee_id' => $employee->id, 'payroll_month' => $month, 'base_salary' => $employee->current_salary, 'allowance' => 0, 'bonus' => $bonus, 'deduction' => $deduction, 'adjustment' => 0, 'total_salary_expense' => $total, 'paid_amount' => 0, 'due_amount' => $total, 'status' => 'unpaid']);
                 $payAmount = match (($employeeIndex + $monthOffset) % 3) {
-                    0 => $total,1 => bcmul($total, '0.70', 2),default => '0'
+                    0 => $total,1 => Money::amount($total, '0.70'),default => '0'
                 };
-                if (bccomp($payAmount, '0', 2) === 1) {
+                if (Money::compareBdt($payAmount, '0') === 1) {
                     app(RecordPayrollPaymentAction::class)->execute($payroll, $payAmount, $actor, now()->subMonths($monthOffset)->endOfMonth()->toDateString(), 'Bank', 'DEMO-PAY');
                 }
             }
@@ -117,7 +119,7 @@ final class DemoDataSeeder extends Seeder
         $pendingCustomer = $customers->last();
         $pendingRate = $pendingCustomer->customerPlatforms()->first();
         if ($pendingRate) {
-            $pending = Sale::query()->create(['sale_number' => app(TransactionNumberGenerator::class)->next('sale'), 'sale_date' => today(), 'customer_id' => $pendingCustomer->id, 'status' => 'pending', 'approval_status' => 'pending', 'created_by' => $users['employee']->id, 'submitted_by' => $users['employee']->id, 'submitted_at' => now(), 'total_usd' => 250, 'total_bdt_revenue' => bcmul('250', (string) $pendingRate->current_selling_rate, 2)]);
+            $pending = Sale::query()->create(['sale_number' => app(TransactionNumberGenerator::class)->next('sale'), 'sale_date' => today(), 'customer_id' => $pendingCustomer->id, 'status' => 'pending', 'approval_status' => 'pending', 'created_by' => $users['employee']->id, 'submitted_by' => $users['employee']->id, 'submitted_at' => now(), 'total_usd' => 250, 'total_bdt_revenue' => Money::amount('250', (string) $pendingRate->current_selling_rate)]);
             SaleLine::query()->create(['sale_id' => $pending->id, 'platform_id' => $pendingRate->platform_id, 'usd_quantity' => 250, 'selling_rate' => $pendingRate->current_selling_rate, 'weighted_cost_rate' => 0, 'revenue' => 0, 'inventory_cost' => 0, 'gross_profit' => 0]);
             $rejected = $pending->replicate(['sale_number']);
             $rejected->sale_number = app(TransactionNumberGenerator::class)->next('sale');

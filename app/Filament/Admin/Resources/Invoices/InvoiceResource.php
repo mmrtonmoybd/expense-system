@@ -8,6 +8,7 @@ use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\Invoices\Schemas\InvoiceInfolist;
 use App\Filament\Admin\Resources\Invoices\Tables\InvoicesTable;
+use App\Filament\Admin\Resources\Invoices\Widgets\InvoiceStatsOverview;
 use App\Models\Invoice;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -29,6 +30,21 @@ final class InvoiceResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.invoice.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.invoice.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Sales');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -64,6 +80,13 @@ final class InvoiceResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            InvoiceStatsOverview::class,
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Models\CustomerPlatform;
 use App\Models\Sale;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
@@ -79,11 +80,10 @@ final readonly class RecalculatePendingSaleAction
                     );
                 }
 
-                $totalUsd = bcadd($totalUsd, (string) $line->usd_quantity, 8);
-                $totalRevenue = bcadd(
+                $totalUsd = Money::addUsd($totalUsd, (string) $line->usd_quantity);
+                $totalRevenue = Money::addBdt(
                     $totalRevenue,
-                    bcmul((string) $line->usd_quantity, (string) $line->selling_rate, 2),
-                    2,
+                    Money::amount((string) $line->usd_quantity, (string) $line->selling_rate),
                 );
             }
 

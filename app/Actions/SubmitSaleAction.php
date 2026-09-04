@@ -8,6 +8,7 @@ use App\Models\CustomerPlatform;
 use App\Models\Sale;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\Money;
 use App\Support\SettingsRepository;
 use LogicException;
 
@@ -46,11 +47,10 @@ final readonly class SubmitSaleAction
         $totalRevenue = '0';
 
         foreach ($sale->lines as $line) {
-            $totalUsd = bcadd($totalUsd, (string) $line->usd_quantity, 8);
-            $totalRevenue = bcadd(
+            $totalUsd = Money::addUsd($totalUsd, (string) $line->usd_quantity);
+            $totalRevenue = Money::addBdt(
                 $totalRevenue,
-                bcmul((string) $line->usd_quantity, (string) $line->selling_rate, 2),
-                2,
+                Money::amount((string) $line->usd_quantity, (string) $line->selling_rate),
             );
         }
 

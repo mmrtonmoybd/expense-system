@@ -11,6 +11,7 @@ use App\Models\Platform;
 use App\Models\User;
 use App\Services\ReportDataBuilder;
 use App\Support\CostingMethod;
+use App\Support\ReportVisibility;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -44,9 +45,24 @@ final class Reports extends Page
 
     protected string $view = 'filament.admin.pages.reports';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('panel.pages.reports');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Reports');
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()?->can('View:Reports') ?? false;
+    }
+
+    public function getTitle(): string
+    {
+        return __('panel.pages.reports');
     }
 
     public function mount(ReportDataBuilder $builder): void
@@ -74,17 +90,7 @@ final class Reports extends Page
                             ->schema([
                                 Select::make('report')
                                     ->label('Report')
-                                    ->options([
-                                        'sales' => 'USD Sales',
-                                        'purchases' => 'USD Purchases',
-                                        'inventory' => 'Inventory Ledger / Valuation',
-                                        'platforms' => 'Platform Performance',
-                                        'customers' => 'Customer Performance',
-                                        'expenses' => 'Expenses',
-                                        'payroll' => 'Payroll',
-                                        'pnl' => 'Profit & Loss',
-                                        'audit' => 'Audit Log',
-                                    ])
+                                    ->options(self::reportOptions())
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function (Set $set): void {
@@ -114,7 +120,7 @@ final class Reports extends Page
                                 Select::make('status')
                                     ->label(fn (Get $get): string => $get('report') === 'inventory' ? 'Transaction type' : 'Status')
                                     ->options(fn (Get $get): array => $this->statusOptions((string) $get('report')))
-                                    ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'purchases', 'inventory', 'payroll'], true)),
+                                    ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'sale_lines', 'purchases', 'inventory', 'payroll', 'invoices'], true)),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -160,6 +166,16 @@ final class Reports extends Page
         ];
     }
 
+    /**
+     * Only the reports the signed-in user is allowed to read.
+     *
+     * @return array<string, string>
+     */
+    private static function reportOptions(): array
+    {
+        return ReportVisibility::for(auth()->user())->allowedReports();
+    }
+
     private function buildReport(ReportDataBuilder $builder): void
     {
         abort_unless(self::canAccess(), 403);
@@ -168,6 +184,7 @@ final class Reports extends Page
             $this->form->getState(),
             self::RowsPerPage,
             $this->reportPage,
+            ReportVisibility::for(auth()->user()),
         );
     }
 
@@ -192,7 +209,7 @@ final class Reports extends Page
 
                 return $customer ? "{$customer->name} ({$customer->phone})" : null;
             })
-            ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'platforms', 'customers'], true));
+            ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'sale_lines', 'platforms', 'customers', 'customer_statement', 'rate_history', 'invoices'], true));
     }
 
     private function platformSelect(): Select
@@ -210,7 +227,7 @@ final class Reports extends Page
                 ->pluck('name', 'id')
                 ->all())
             ->getOptionLabelUsing(fn (mixed $value): ?string => Platform::query()->whereKey($value)->value('name'))
-            ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'platforms', 'customers'], true));
+            ->visible(fn (Get $get): bool => in_array($get('report'), ['sales', 'sale_lines', 'platforms', 'customers', 'customer_statement', 'rate_history', 'invoices'], true));
     }
 
     private function expenseCategorySelect(): Select
@@ -249,7 +266,7 @@ final class Reports extends Page
 
                 return $employee ? "{$employee->name} ({$employee->employee_code})" : null;
             })
-            ->visible(fn (Get $get): bool => $get('report') === 'payroll');
+            ->visible(fn (Get $get): bool => in_array($get('report'), ['payroll', 'employee_statement'], true));
     }
 
     private function userSelect(): Select
@@ -275,6 +292,7 @@ final class Reports extends Page
     {
         return match ($report) {
             'purchases' => ['draft' => 'Draft', 'posted' => 'Posted', 'reversed' => 'Reversed'],
+            'invoices' => ['issued' => 'Issued', 'cancelled' => 'Cancelled'],
             'inventory' => [
                 'opening_balance' => 'Opening balance',
                 'purchase' => 'Purchase',

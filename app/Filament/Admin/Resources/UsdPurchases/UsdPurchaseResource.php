@@ -11,6 +11,8 @@ use App\Filament\Admin\Resources\UsdPurchases\Pages\ViewUsdPurchase;
 use App\Filament\Admin\Resources\UsdPurchases\Schemas\UsdPurchaseForm;
 use App\Filament\Admin\Resources\UsdPurchases\Schemas\UsdPurchaseInfolist;
 use App\Filament\Admin\Resources\UsdPurchases\Tables\UsdPurchasesTable;
+use App\Filament\Admin\Resources\UsdPurchases\Widgets\UsdPurchaseStatsOverview;
+use App\Filament\Admin\Resources\UsdPurchases\Widgets\UsdPurchaseTrendChart;
 use App\Models\UsdPurchase;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -31,6 +33,21 @@ final class UsdPurchaseResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'purchase_number';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.usd_purchase.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.usd_purchase.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Inventory');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -71,6 +88,14 @@ final class UsdPurchaseResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            UsdPurchaseStatsOverview::class,
+            UsdPurchaseTrendChart::class,
         ];
     }
 

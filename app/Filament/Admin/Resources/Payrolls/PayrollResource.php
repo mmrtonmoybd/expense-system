@@ -12,6 +12,8 @@ use App\Filament\Admin\Resources\Payrolls\RelationManagers\PaymentsRelationManag
 use App\Filament\Admin\Resources\Payrolls\Schemas\PayrollForm;
 use App\Filament\Admin\Resources\Payrolls\Schemas\PayrollInfolist;
 use App\Filament\Admin\Resources\Payrolls\Tables\PayrollsTable;
+use App\Filament\Admin\Resources\Payrolls\Widgets\PayrollStatsOverview;
+use App\Filament\Admin\Resources\Payrolls\Widgets\PayrollTrendChart;
 use App\Models\Payroll;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -33,6 +35,21 @@ final class PayrollResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'payroll_number';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.payroll.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.payroll.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Payroll');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -78,6 +95,14 @@ final class PayrollResource extends Resource
     {
         return [
             PaymentsRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            PayrollStatsOverview::class,
+            PayrollTrendChart::class,
         ];
     }
 

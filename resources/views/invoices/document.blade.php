@@ -1,10 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ \App\Support\Localization::tag() }}">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{{ $invoice->invoice_number }}</title>
         <style>
+            @font-face {
+                font-family: 'notosansbengali';
+                font-style: normal;
+                font-weight: 400;
+                src: url('{{ \App\Support\Localization::documentFontPath() }}') format('truetype');
+            }
+
+            @font-face {
+                font-family: 'notosansbengali';
+                font-style: normal;
+                font-weight: 700;
+                src: url('{{ \App\Support\Localization::documentFontPath('Bold') }}') format('truetype');
+            }
+
             @page {
                 margin: 30px 34px;
             }
@@ -18,7 +32,9 @@
                 color: #172033;
                 background: #f4f6fc;
                 font:
-                    13px DejaVu Sans,
+                    13px 'notosansbengali',
+                    'Noto Sans Bengali',
+                    DejaVu Sans,
                     sans-serif;
                 line-height: 1.55;
             }
@@ -273,6 +289,23 @@
                     display: none;
                 }
             }
+
+            @if (\App\Support\Localization::isBengali())
+                /*
+                 * Bengali is laid out in clusters: a vowel sign is reordered around the
+                 * consonant it belongs to. Letter-spacing splits those clusters apart, which
+                 * moves the sign to the wrong side, and uppercasing means nothing in the
+                 * script. Both are dropped for Bengali.
+                 */
+                .invoice-title,
+                .meta-label,
+                .section-label,
+                .status,
+                .items th {
+                    letter-spacing: normal;
+                    text-transform: none;
+                }
+            @endif
         </style>
     </head>
     <body @if ($print ?? false) onload="window.print()" @endif>
@@ -310,9 +343,9 @@
                             @endif
                         </td>
                         <td class="align-right" style="width: 38%">
-                            <h1 class="invoice-title">INVOICE</h1>
+                            <h1 class="invoice-title">{{ __('documents.invoice.title') }}</h1>
                             <div class="invoice-number"># {{ $invoice->invoice_number }}</div>
-                            <span class="status">{{ $invoice->status }}</span>
+                            <span class="status">{{ __('documents.invoice.status.'.$invoice->status) }}</span>
                         </td>
                     </tr>
                 </table>
@@ -322,7 +355,7 @@
                 <table class="parties">
                     <tr>
                         <td class="party-card">
-                            <div class="section-label">Billed to</div>
+                            <div class="section-label">{{ __('documents.invoice.billed_to') }}</div>
                             <div class="party-name">{{ $invoice->sale->customer->name }}</div>
                             @if ($invoice->sale->customer->company_name)
                                 <div>{{ $invoice->sale->customer->company_name }}</div>
@@ -338,23 +371,23 @@
                             @endif
                         </td>
                         <td class="party-card right">
-                            <div class="section-label">Invoice details</div>
+                            <div class="section-label">{{ __('documents.invoice.details') }}</div>
                             <table style="margin-top: 6px">
                                 <tr>
-                                    <td class="muted">Invoice date</td>
+                                    <td class="muted">{{ __('documents.invoice.date') }}</td>
                                     <td class="align-right">
                                         <strong>
-                                            {{ $invoice->invoice_date->format(config('app.date_format')) }}
+                                            {{ \App\Support\Localization::date($invoice->invoice_date) }}
                                         </strong>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="muted">Sale reference</td>
+                                    <td class="muted">{{ __('documents.invoice.sale_reference') }}</td>
                                     <td class="align-right"><strong>{{ $invoice->sale->sale_number }}</strong></td>
                                 </tr>
                                 <tr>
-                                    <td class="muted">Currency</td>
-                                    <td class="align-right"><strong>BDT</strong></td>
+                                    <td class="muted">{{ __('documents.invoice.currency') }}</td>
+                                    <td class="align-right"><strong>{{ __('documents.invoice.currency_value') }}</strong></td>
                                 </tr>
                             </table>
                         </td>
@@ -364,21 +397,21 @@
                 <table class="items">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Platform</th>
-                            <th>USD Quantity</th>
-                            <th>Rate (BDT/USD)</th>
-                            <th>Amount (BDT)</th>
+                            <th>{{ __('documents.invoice.line_number') }}</th>
+                            <th>{{ __('documents.invoice.platform') }}</th>
+                            <th>{{ __('documents.invoice.usd_quantity') }}</th>
+                            <th>{{ __('documents.invoice.rate') }}</th>
+                            <th>{{ __('documents.invoice.amount') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($invoice->sale->lines as $line)
                             <tr>
-                                <td class="line-number">{{ $loop->iteration }}</td>
+                                <td class="line-number">{{ \App\Support\Localization::digits((string) $loop->iteration) }}</td>
                                 <td><strong>{{ $line->platform->name }}</strong></td>
-                                <td>{{ number_format((float) $line->usd_quantity, 2) }}</td>
-                                <td>{{ number_format((float) $line->selling_rate, 2) }}</td>
-                                <td><strong>{{ number_format((float) $line->revenue, 2) }}</strong></td>
+                                <td>{{ \App\Support\Localization::number($line->usd_quantity) }}</td>
+                                <td>{{ \App\Support\Localization::number($line->selling_rate) }}</td>
+                                <td><strong>{{ \App\Support\Localization::number($line->revenue) }}</strong></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -390,15 +423,15 @@
                         <td class="summary-box">
                             <table>
                                 <tr class="summary-row">
-                                    <td class="muted">Total USD</td>
+                                    <td class="muted">{{ __('documents.invoice.total_usd') }}</td>
                                     <td class="align-right">
-                                        <strong>{{ number_format((float) $invoice->sale->total_usd, 2) }}</strong>
+                                        <strong>{{ \App\Support\Localization::number($invoice->sale->total_usd) }}</strong>
                                     </td>
                                 </tr>
                                 <tr class="grand-total">
-                                    <td>Grand Total</td>
+                                    <td>{{ __('documents.invoice.grand_total') }}</td>
                                     <td class="align-right">
-                                        BDT {{ number_format((float) $invoice->sale->total_bdt_revenue, 2) }}
+                                        {{ __('documents.invoice.currency_value') }} {{ \App\Support\Localization::number($invoice->sale->total_bdt_revenue) }}
                                     </td>
                                 </tr>
                             </table>
@@ -408,7 +441,7 @@
 
                 @if ($invoice->sale->note)
                     <div class="notes">
-                        <div class="section-label">Note</div>
+                        <div class="section-label">{{ __('documents.invoice.note') }}</div>
                         <div>{{ $invoice->sale->note }}</div>
                     </div>
                 @endif
@@ -417,7 +450,7 @@
                     <tr>
                         <td class="terms">
                             @if ($settings->get('invoice_terms'))
-                                <div class="section-label">Terms & conditions</div>
+                                <div class="section-label">{{ __('documents.invoice.terms') }}</div>
                                 <div class="muted" style="margin-top: 6px">{{ $settings->get('invoice_terms') }}</div>
                             @endif
                         </td>
@@ -426,7 +459,7 @@
                                 <strong>{{ $settings->get('authorized_person') }}</strong>
                                 <br />
                                 <span class="muted">
-                                    {{ $settings->get('signature_label', 'Authorized signature') }}
+                                    {{ $settings->get('signature_label') ?: __('documents.invoice.signature') }}
                                 </span>
                             </div>
                         </td>
@@ -434,10 +467,9 @@
                 </table>
 
                 <div class="footer">
-                    {{ $settings->get('invoice_footer', 'Thank you for your business.') }}
+                    {{ $settings->get('invoice_footer') ?: __('documents.invoice.footer') }}
                     <br />
-                    Invoice {{ $invoice->invoice_number }} · Generated
-                    {{ now()->format(config('app.datetime_format')) }}
+                    {{ __('documents.invoice.generated', ['number' => $invoice->invoice_number, 'at' => \App\Support\Localization::dateTime(now())]) }}
                 </div>
             </div>
         </main>

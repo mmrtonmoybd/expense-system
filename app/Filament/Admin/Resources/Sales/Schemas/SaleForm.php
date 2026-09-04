@@ -140,8 +140,15 @@ final class SaleForm
                                 ->prefix('৳')
                                 ->required()
                                 ->live(onBlur: true)
-                                ->disabled(fn (): bool => ! (auth()->user()?->can('OverrideRate:Sale') ?? false))
+                                ->disabled(fn (): bool => ! self::canOverrideRate())
                                 ->dehydrated()
+                                // The field is submitted even while disabled, so the stored
+                                // rate is resolved on the server. A tampered payload from a
+                                // user without the override permission is discarded here
+                                // instead of only being caught later at submit time.
+                                ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => self::canOverrideRate()
+                                    ? $state
+                                    : self::customerPlatformRate($get('../../customer_id'), $get('platform_id')) ?? $state)
                                 ->afterStateHydrated(function (Get $get, Set $set, mixed $state): void {
                                     if (filled($state)) {
                                         return;
@@ -157,7 +164,7 @@ final class SaleForm
                                     TextInput::make('rate_override_reason')
                                         ->label('Override reason')
                                         ->visible(fn (string $operation): bool => $operation === 'edit'
-                                            && (auth()->user()?->can('OverrideRate:Sale') ?? false)),
+                                            && self::canOverrideRate()),
                                     TextInput::make('note')
                                         ->label('Note')
                                         ->placeholder('Optional note'),
@@ -190,6 +197,11 @@ final class SaleForm
                 ])
                 ->columnSpanFull(),
         ]);
+    }
+
+    private static function canOverrideRate(): bool
+    {
+        return auth()->user()?->can('OverrideRate:Sale') ?? false;
     }
 
     private static function customerPlatformRate(mixed $customerId, mixed $platformId): ?string

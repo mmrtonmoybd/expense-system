@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Support\PdfDocument;
 use App\Support\SettingsRepository;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +25,8 @@ final class InvoiceController extends Controller
         Gate::authorize('view', $invoice);
         $invoice->load('sale.customer', 'sale.lines.platform');
 
-        return Pdf::loadView('invoices.document', compact('invoice', 'settings'))->setPaper('a4')->download($invoice->invoice_number.'.pdf');
+        return PdfDocument::render('invoices.document', compact('invoice', 'settings'))
+            ->setPaper('a4')
+            ->download($invoice->invoice_number.'.pdf');
     }
 }

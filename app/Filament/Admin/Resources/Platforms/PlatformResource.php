@@ -11,6 +11,8 @@ use App\Filament\Admin\Resources\Platforms\Pages\ViewPlatform;
 use App\Filament\Admin\Resources\Platforms\Schemas\PlatformForm;
 use App\Filament\Admin\Resources\Platforms\Schemas\PlatformInfolist;
 use App\Filament\Admin\Resources\Platforms\Tables\PlatformsTable;
+use App\Filament\Admin\Resources\Platforms\Widgets\PlatformPerformanceStats;
+use App\Filament\Admin\Resources\Platforms\Widgets\PlatformStatsOverview;
 use App\Models\Platform;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -31,6 +33,21 @@ final class PlatformResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.resources.platform.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.resources.platform.plural');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('panel.groups.Customers');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -61,6 +78,14 @@ final class PlatformResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            PlatformPerformanceStats::class,
+            PlatformStatsOverview::class,
         ];
     }
 
